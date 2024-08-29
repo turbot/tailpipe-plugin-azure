@@ -1,4 +1,4 @@
-package azure_partition
+package azure_table
 
 import (
 	"fmt"
@@ -10,30 +10,30 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
-	"github.com/turbot/tailpipe-plugin-sdk/partition"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
-type ActivityLogPartition struct {
-	partition.PartitionBase[*ActivityLogPartitionConfig]
+type ActivityLogTable struct {
+	table.TableBase[*ActivityLogTableConfig]
 }
 
-func NewActivityLogPartition() partition.Partition {
-	return &ActivityLogPartition{}
+func NewActivityLogTable() table.Table {
+	return &ActivityLogTable{}
 }
 
-func (c *ActivityLogPartition) Identifier() string {
+func (c *ActivityLogTable) Identifier() string {
 	return "azure_activity_log"
 }
 
-func (c *ActivityLogPartition) GetRowSchema() any {
+func (c *ActivityLogTable) GetRowSchema() any {
 	return azure_types.ActivityLogRow{}
 }
 
-func (c *ActivityLogPartition) GetConfigSchema() parse.Config {
-	return &ActivityLogPartitionConfig{}
+func (c *ActivityLogTable) GetConfigSchema() parse.Config {
+	return &ActivityLogTableConfig{}
 }
 
-func (c *ActivityLogPartition) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
+func (c *ActivityLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	logEntry, ok := row.(*armmonitor.EventData)
 	if !ok {
 		return nil, fmt.Errorf("invalid row type: %T, expected *armmonitor.EventData", row)
