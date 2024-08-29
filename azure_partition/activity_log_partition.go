@@ -1,4 +1,4 @@
-package azure_collection
+package azure_partition
 
 import (
 	"fmt"
@@ -7,39 +7,39 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/xid"
 	"github.com/turbot/tailpipe-plugin-azure/azure_types"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/hcl"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
+	"github.com/turbot/tailpipe-plugin-sdk/parse"
+	"github.com/turbot/tailpipe-plugin-sdk/partition"
 )
 
-type ActivityLogCollection struct {
-	collection.CollectionBase[*ActivityLogCollectionConfig]
+type ActivityLogPartition struct {
+	partition.PartitionBase[*ActivityLogPartitionConfig]
 }
 
-func NewActivityLogCollection() collection.Collection {
-	return &ActivityLogCollection{}
+func NewActivityLogPartition() partition.Partition {
+	return &ActivityLogPartition{}
 }
 
-func (c *ActivityLogCollection) Identifier() string {
+func (c *ActivityLogPartition) Identifier() string {
 	return "azure_activity_log"
 }
 
-func (c *ActivityLogCollection) GetRowSchema() any {
+func (c *ActivityLogPartition) GetRowSchema() any {
 	return azure_types.ActivityLogRow{}
 }
 
-func (c *ActivityLogCollection) GetConfigSchema() hcl.Config {
-	return &ActivityLogCollectionConfig{}
+func (c *ActivityLogPartition) GetConfigSchema() parse.Config {
+	return &ActivityLogPartitionConfig{}
 }
 
-func (c *ActivityLogCollection) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
+func (c *ActivityLogPartition) EnrichRow(row any, sourceEnrichmentFields *enrichment.CommonFields) (any, error) {
 	logEntry, ok := row.(*armmonitor.EventData)
 	if !ok {
 		return nil, fmt.Errorf("invalid row type: %T, expected *armmonitor.EventData", row)
 	}
 
-	if sourceEnrichmentFields == nil || sourceEnrichmentFields.TpConnection == "" {
+	if sourceEnrichmentFields == nil || sourceEnrichmentFields.TpIndex == "" {
 		return nil, fmt.Errorf("source must provide connection in sourceEnrichmentFields")
 	}
 
@@ -94,7 +94,7 @@ func (c *ActivityLogCollection) EnrichRow(row any, sourceEnrichmentFields *enric
 	// TODO: #enrichment process more Tp fields from the logEntry
 
 	// Hive Fields
-	record.TpCollection = c.Identifier()
+	record.TpIndex = c.Identifier()
 	record.TpYear = int32(logEntry.EventTimestamp.Year())
 	record.TpMonth = int32(logEntry.EventTimestamp.Month())
 	record.TpDay = int32(logEntry.EventTimestamp.Day())

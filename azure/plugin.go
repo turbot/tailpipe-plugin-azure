@@ -1,12 +1,12 @@
 package azure
 
 import (
+	"github.com/turbot/tailpipe-plugin-azure/azure_partition"
+	"github.com/turbot/tailpipe-plugin-sdk/partition"
 	"log/slog"
 	"time"
 
-	"github.com/turbot/tailpipe-plugin-azure/azure_collection"
 	"github.com/turbot/tailpipe-plugin-azure/azure_source"
-	"github.com/turbot/tailpipe-plugin-sdk/collection"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 )
@@ -24,8 +24,8 @@ func NewPlugin() (plugin.TailpipePlugin, error) {
 
 	err := p.RegisterResources(
 		&plugin.ResourceFunctions{
-			Collections: []func() collection.Collection{azure_collection.NewActivityLogCollection},
-			Sources:     []func() row_source.RowSource{azure_source.NewActivityLogAPISource},
+			Partitions: []func() partition.Partition{azure_partition.NewActivityLogPartition},
+			Sources:    []func() row_source.RowSource{azure_source.NewActivityLogAPISource},
 		})
 
 	if err != nil {
