@@ -8,7 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/hcl"
+	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
@@ -37,7 +37,7 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 
 	sourceEnrichmentFields := &enrichment.CommonFields{
 		TpSourceType: ActivityLogAPISourceIdentifier,
-		TpConnection: s.Config.SubscriptionId,
+		TpIndex:      s.Config.SubscriptionId,
 		// TODO: #enrichment can we add more source fields?
 	}
 
@@ -69,7 +69,7 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	return nil
 }
 
-func (s *ActivityLogAPISource) GetConfigSchema() hcl.Config {
+func (s *ActivityLogAPISource) GetConfigSchema() parse.Config {
 	return &ActivityLogAPISourceConfig{}
 }
 
