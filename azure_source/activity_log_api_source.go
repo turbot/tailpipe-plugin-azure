@@ -25,9 +25,9 @@ func NewActivityLogAPISource() row_source.RowSource {
 
 func (s *ActivityLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
-	s.SetCollectionStateFunc(NewActivityLogAPICollectionState)
+	s.NewCollectionStateFunc = NewActivityLogAPICollectionState
 
-	// call base init
+	// call base initma
 	return s.RowSourceBase.Init(ctx, configData, opts...)
 }
 
