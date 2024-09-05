@@ -15,8 +15,12 @@ type ActivityLogAPICollectionState struct {
 	// NOTE: Whilst haven't seen evidence of this, it may be possible to have 2 records in the same timestamp; to combat this we may wish to store map of IDs at the timestamps akin to ArtifactCollectionState.
 }
 
-func NewActivityLogAPICollectionState() collection_state.CollectionState {
+func NewActivityLogAPICollectionState() collection_state.CollectionState[*ActivityLogAPISourceConfig] {
 	return &ActivityLogAPICollectionState{}
+}
+
+func (s *ActivityLogAPICollectionState) Init(*ActivityLogAPISourceConfig) error {
+	return nil
 }
 
 func (s *ActivityLogAPICollectionState) IsEmpty() bool {
