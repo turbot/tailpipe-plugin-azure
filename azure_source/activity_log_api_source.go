@@ -23,17 +23,27 @@ func NewActivityLogAPISource() row_source.RowSource {
 	return &ActivityLogAPISource{}
 }
 
+func (s *ActivityLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
+	// set the collection state ctor
+	s.SetCollectionStateFunc(NewActivityLogAPICollectionState)
+
+	// call base init
+	return s.RowSourceBase.Init(ctx, configData, opts...)
+}
+
 func (s *ActivityLogAPISource) Identifier() string {
 	return ActivityLogAPISourceIdentifier
 }
 
 func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
-	// TODO: #paging implement paging
-	client, err := s.getClient()
+	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
+	collectionState := s.CollectionState.(*ActivityLogAPICollectionState)
+	collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
+
+	client, err := s.getClient() // client doesn't have a Close() method, nothing to defer
 	if err != nil {
 		return err
 	}
-	// client doesn't have s Close() method
 
 	sourceEnrichmentFields := &enrichment.CommonFields{
 		TpSourceType: ActivityLogAPISourceIdentifier,
@@ -41,9 +51,15 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 		// TODO: #enrichment can we add more source fields?
 	}
 
-	// TODO: #config move these to config
-	startTime := time.Now().Add(-2159 * time.Hour) // 89 days 23 hours => { "code" : "BadRequest", "message" : "The start time cannot be more than 90 days in the past."}
+	// TODO: #config should we move these to config?
 	endTime := time.Now()
+	startTime := endTime.Add(-2160 * time.Hour) // 2160hr == 90 days => { "code" : "BadRequest", "message" : "The start time cannot be more than 90 days in the past."}
+
+	if !collectionState.IsEmpty() {
+		if collectionState.EndTime.After(startTime) {
+			startTime = collectionState.EndTime
+		}
+	}
 
 	filter := fmt.Sprintf("eventTimestamp ge '%s' and eventTimestamp le '%s'", startTime.Format(time.RFC3339Nano), endTime.Format(time.RFC3339Nano))
 	pager := client.NewListPager(filter, nil)
@@ -55,12 +71,25 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 		}
 
 		for _, logEntry := range page.Value {
+
+			// check if we've hit previous item - return false if we have, return from function
+			if !collectionState.ShouldCollectRow(*logEntry.EventTimestamp) {
+				return nil
+			}
+
 			row := &types.RowData{
 				Data:     logEntry,
 				Metadata: sourceEnrichmentFields,
 			}
 
-			if err := s.OnRow(ctx, row, nil); err != nil {
+			// update collection state
+			collectionState.Upsert(*logEntry.EventTimestamp)
+			collectionStateJSON, err := s.GetCollectionStateJSON()
+			if err != nil {
+				return fmt.Errorf("error serialising collectionState data: %w", err)
+			}
+
+			if err := s.OnRow(ctx, row, collectionStateJSON); err != nil {
 				return fmt.Errorf("failed to processing row: %w", err)
 			}
 		}
