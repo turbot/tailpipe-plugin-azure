@@ -95,9 +95,7 @@ func (c *ActivityLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment
 
 	// Hive Fields
 	record.TpPartition = c.Identifier()
-	record.TpYear = int32(logEntry.EventTimestamp.Year())
-	record.TpMonth = int32(logEntry.EventTimestamp.Month())
-	record.TpDay = int32(logEntry.EventTimestamp.Day())
+	record.TpDate = logEntry.EventTimestamp.Format("2006-01-02")
 
 	return record, nil
 }
