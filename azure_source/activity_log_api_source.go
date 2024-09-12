@@ -26,7 +26,7 @@ func NewActivityLogAPISource() row_source.RowSource {
 
 func (s *ActivityLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
-	s.NewCollectionStateFunc = collection_state.NewGenericCollectionState
+	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
 	return s.RowSourceBase.Init(ctx, configData, opts...)
@@ -38,7 +38,7 @@ func (s *ActivityLogAPISource) Identifier() string {
 
 func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
-	collectionState := s.CollectionState.(*collection_state.GenericCollectionState[*ActivityLogAPISourceConfig])
+	collectionState := s.CollectionState.(*collection_state.TimeRangeCollectionState[*ActivityLogAPISourceConfig])
 	// TODO: #config the below should be settable via a config option
 	collectionState.IsChronological = false
 	collectionState.HasContinuation = true
