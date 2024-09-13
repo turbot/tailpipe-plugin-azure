@@ -1,6 +1,6 @@
 # Paths
 PLUGIN_NAME=tailpipe-plugin-azure.plugin
-PLUGIN_DIR=~/.tailpipe/plugins/
+PLUGIN_DIR=~/.tailpipe/plugins/hub.tailpipe.io/plugins/turbot/azure@latest/
 
 # Build in development mode by default
 .PHONY: default
