@@ -1,4 +1,4 @@
-package azure_types
+package models
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 )
 
-type ActivityLogRow struct {
+type ActivityLog struct {
 	enrichment.CommonFields
 
 	AuthorizationAction *string `json:"authorization_action"`
