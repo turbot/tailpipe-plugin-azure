@@ -1,4 +1,4 @@
-package azure_table
+package tables
 
 type ActivityLogTableConfig struct{}
 

@@ -1,4 +1,4 @@
-package azure_source
+package sources
 
 import "fmt"
 

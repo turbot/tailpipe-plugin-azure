@@ -1,4 +1,4 @@
-package azure_table
+package tables
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/xid"
-	"github.com/turbot/tailpipe-plugin-azure/azure_types"
+	"github.com/turbot/tailpipe-plugin-azure/models"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
@@ -26,7 +26,7 @@ func (c *ActivityLogTable) Identifier() string {
 }
 
 func (c *ActivityLogTable) GetRowSchema() any {
-	return azure_types.ActivityLogRow{}
+	return models.ActivityLog{}
 }
 
 func (c *ActivityLogTable) GetConfigSchema() parse.Config {
@@ -43,7 +43,7 @@ func (c *ActivityLogTable) EnrichRow(row any, sourceEnrichmentFields *enrichment
 		return nil, fmt.Errorf("source must provide connection in sourceEnrichmentFields")
 	}
 
-	record := &azure_types.ActivityLogRow{CommonFields: *sourceEnrichmentFields}
+	record := &models.ActivityLog{CommonFields: *sourceEnrichmentFields}
 
 	if logEntry.Authorization != nil {
 		record.AuthorizationAction = logEntry.Authorization.Action
