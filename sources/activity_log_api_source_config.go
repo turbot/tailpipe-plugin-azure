@@ -1,8 +1,12 @@
 package sources
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/turbot/tailpipe-plugin-sdk/artifact_source_config"
+)
 
 type ActivityLogAPISourceConfig struct {
+	artifact_source_config.ArtifactSourceConfigBase
 	// TODO: #config determine if we can support other authentication types and configuration requirements for these
 	TenantId       string `hcl:"tenant_id"`
 	SubscriptionId string `hcl:"subscription_id"`
