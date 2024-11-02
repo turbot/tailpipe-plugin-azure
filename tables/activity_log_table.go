@@ -2,10 +2,12 @@ package tables
 
 import (
 	"fmt"
+
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/xid"
+	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-azure/models"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/helpers"
@@ -14,7 +16,7 @@ import (
 )
 
 type ActivityLogTable struct {
-	table.TableBase[*ActivityLogTableConfig]
+	table.TableBase[*ActivityLogTableConfig, *config.AzureConnection]
 }
 
 func NewActivityLogTable() table.Table {

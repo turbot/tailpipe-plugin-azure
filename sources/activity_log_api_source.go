@@ -24,7 +24,7 @@ func NewActivityLogAPISource() row_source.RowSource {
 	return &ActivityLogAPISource{}
 }
 
-func (s *ActivityLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
+func (s *ActivityLogAPISource) Init(ctx context.Context, configData *types.ConfigData, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
 	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
