@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
+	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
@@ -17,19 +18,19 @@ import (
 const ActivityLogAPISourceIdentifier = "azure_activity_log_api"
 
 type ActivityLogAPISource struct {
-	row_source.RowSourceBase[*ActivityLogAPISourceConfig]
+	row_source.RowSourceImpl[*ActivityLogAPISourceConfig]
 }
 
 func NewActivityLogAPISource() row_source.RowSource {
 	return &ActivityLogAPISource{}
 }
 
-func (s *ActivityLogAPISource) Init(ctx context.Context, configData *parse.Data, opts ...row_source.RowSourceOption) error {
+func (s *ActivityLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
 	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
-	return s.RowSourceBase.Init(ctx, configData, opts...)
+	return s.RowSourceImpl.Init(ctx, configData, opts...)
 }
 
 func (s *ActivityLogAPISource) Identifier() string {
