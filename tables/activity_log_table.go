@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/rs/xid"
+
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-azure/mappers"
 	"github.com/turbot/tailpipe-plugin-azure/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/helpers"
 	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
@@ -59,9 +59,8 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	}
 	// Record Standardization
 	row.TpID = xid.New().String()
-	row.TpSourceType = c.Identifier()
-	row.TpTimestamp = helpers.UnixMillis(row.EventTimestamp.UnixNano() / int64(time.Millisecond))
-	row.TpIngestTimestamp = helpers.UnixMillis(time.Now().UnixNano() / int64(time.Millisecond))
+	row.TpTimestamp = *row.EventTimestamp
+	row.TpIngestTimestamp = time.Now()
 
 	// TODO: #enrichment process more Tp fields from the row
 
