@@ -61,6 +61,8 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	row.TpID = xid.New().String()
 	row.TpTimestamp = *row.EventTimestamp
 	row.TpIngestTimestamp = time.Now()
+	row.TpPartition = c.Identifier()
+	row.TpIndex = *row.SubscriptionID
 
 	// TODO: #enrichment process more Tp fields from the row
 
