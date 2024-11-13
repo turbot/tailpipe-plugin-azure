@@ -16,11 +16,16 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
+// register the table from the package init function
+func init() {
+	table.RegisterTable(NewActivityLogTable)
+}
+
 type ActivityLogTable struct {
 	table.TableImpl[*rows.ActivityLog, *ActivityLogTableConfig, *config.AzureConnection]
 }
 
-func NewActivityLogTable() table.Table {
+func NewActivityLogTable() table.Enricher[*rows.ActivityLog] {
 	return &ActivityLogTable{}
 }
 
@@ -44,7 +49,7 @@ func (c *ActivityLogTable) Identifier() string {
 	return "azure_activity_log"
 }
 
-func (c *ActivityLogTable) GetRowSchema() any {
+func (c *ActivityLogTable) GetRowSchema() types.RowStruct {
 	return rows.ActivityLog{}
 }
 
@@ -63,11 +68,12 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	row.TpIngestTimestamp = time.Now()
 	row.TpPartition = c.Identifier()
 	row.TpIndex = *row.SubscriptionID
+	row.TpSourceType = "azure_activity_log"
 
 	// TODO: #enrichment process more Tp fields from the row
 
 	// Hive Fields
-	row.TpDate = row.EventTimestamp.Format("2006-01-02")
+	row.TpDate = row.EventTimestamp.Truncate(24 * time.Hour)
 
 	return row, nil
 }

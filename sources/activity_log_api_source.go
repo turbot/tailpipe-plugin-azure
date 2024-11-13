@@ -17,6 +17,11 @@ import (
 
 const ActivityLogAPISourceIdentifier = "azure_activity_log_api"
 
+// register the source from the package init function
+func init() {
+	row_source.Factory.RegisterRowSource(NewActivityLogAPISource)
+}
+
 type ActivityLogAPISource struct {
 	row_source.RowSourceImpl[*ActivityLogAPISourceConfig]
 }

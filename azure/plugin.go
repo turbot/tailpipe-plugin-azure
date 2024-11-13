@@ -5,11 +5,12 @@ import (
 
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/tailpipe-plugin-azure/config"
-	"github.com/turbot/tailpipe-plugin-azure/sources"
-	"github.com/turbot/tailpipe-plugin-azure/tables"
+	_ "github.com/turbot/tailpipe-plugin-azure/sources"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
-	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
+
+	// reference the table package to ensure that the tables are registered by the init functions
+	_ "github.com/turbot/tailpipe-plugin-azure/tables"
 )
 
 type Plugin struct {
@@ -30,15 +31,8 @@ func NewPlugin() (_ plugin.TailpipePlugin, err error) {
 		PluginImpl: plugin.NewPluginImpl("azure", config.NewAzureConnection),
 	}
 
-	// register the tables that we provide
-	resources := &plugin.ResourceFunctions{
-		Tables: []func() table.Table{
-			tables.NewActivityLogTable,
-		},
-		Sources: []func() row_source.RowSource{sources.NewActivityLogAPISource},
-	}
-
-	if err := p.RegisterResources(resources); err != nil {
+	// initialise table factory
+	if err := table.Factory.Init(); err != nil {
 		return nil, err
 	}
 
