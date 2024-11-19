@@ -10,7 +10,6 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
-	"github.com/turbot/tailpipe-plugin-sdk/parse"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
@@ -19,15 +18,12 @@ const ActivityLogAPISourceIdentifier = "azure_activity_log_api"
 
 // register the source from the package init function
 func init() {
-	row_source.Factory.RegisterRowSource(NewActivityLogAPISource)
+	row_source.RegisterRowSource[*ActivityLogAPISource]()
+	//(NewActivityLogAPISource)
 }
 
 type ActivityLogAPISource struct {
 	row_source.RowSourceImpl[*ActivityLogAPISourceConfig]
-}
-
-func NewActivityLogAPISource() row_source.RowSource {
-	return &ActivityLogAPISource{}
 }
 
 func (s *ActivityLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
@@ -45,10 +41,8 @@ func (s *ActivityLogAPISource) Identifier() string {
 func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
 	collectionState := s.CollectionState.(*collection_state.TimeRangeCollectionState[*ActivityLogAPISourceConfig])
-	// TODO: #config the below should be settable via a config option
 	collectionState.IsChronological = false
 	collectionState.HasContinuation = true
-	// TODO: #collectionState is there a way we can call StartCollection/EndCollection from elsewhere to enforce it?
 	collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
 
 	client, err := s.getClient() // client doesn't have a Close() method, nothing to defer
@@ -56,13 +50,13 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 		return err
 	}
 
+	tpSource := fmt.Sprint(ActivityLogAPISourceIdentifier)
 	sourceEnrichmentFields := &enrichment.CommonFields{
 		TpSourceType: ActivityLogAPISourceIdentifier,
-		TpIndex:      s.Config.SubscriptionId,
-		// TODO: #enrichment can we add more source fields?
+		TpIndex:      *s.Config.SubscriptionId,
+		TpSourceName: &tpSource,
 	}
 
-	// TODO: #config should we move these to config?
 	endTime := time.Now()
 	startTime := endTime.Add(-2160 * time.Hour) // 2160hr == 90 days => { "code" : "BadRequest", "message" : "The start time cannot be more than 90 days in the past."}
 
@@ -110,18 +104,14 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	return nil
 }
 
-func (s *ActivityLogAPISource) GetConfigSchema() parse.Config {
-	return &ActivityLogAPISourceConfig{}
-}
-
 func (s *ActivityLogAPISource) getClient() (*armmonitor.ActivityLogsClient, error) {
 	// TODO: #authentication support other authentication methods
-	cred, err := azidentity.NewClientSecretCredential(s.Config.TenantId, s.Config.ClientId, s.Config.ClientSecret, nil)
+	cred, err := azidentity.NewClientSecretCredential(*s.Config.TenantId, *s.Config.ClientId, *s.Config.ClientSecret, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client secret credential: %w", err)
 	}
 
-	client, err := armmonitor.NewActivityLogsClient(s.Config.SubscriptionId, cred, nil)
+	client, err := armmonitor.NewActivityLogsClient(*s.Config.SubscriptionId, cred, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create activity logs client: %w", err)
 	}
