@@ -2,11 +2,14 @@ package mappers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
+
 	"github.com/turbot/tailpipe-plugin-azure/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
+	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
 type ActivityLogMapper struct{}
@@ -69,6 +72,26 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any) ([]*rows.ActivityLog, 
 	row.SubmissionTimestamp = logEntry.SubmissionTimestamp
 	row.SubscriptionID = logEntry.SubscriptionID
 	row.TenantID = logEntry.TenantID
+
+	if logEntry.Claims != nil {
+		// marshal the claims to JSON
+		claims, err := json.Marshal(logEntry.Claims)
+		if err != nil {
+			return nil, fmt.Errorf("error marshalling claims: %w", err)
+		}
+		claimsJson := types.JSONString(claims)
+		row.Claims = &claimsJson
+	}
+
+	if logEntry.Properties != nil {
+		// marshal the properties to JSON
+		properties, err := json.Marshal(logEntry.Properties)
+		if err != nil {
+			return nil, fmt.Errorf("error marshalling properties: %w", err)
+		}
+		propertiesJson := types.JSONString(properties)
+		row.Properties = &propertiesJson
+	}
 
 	return []*rows.ActivityLog{row}, nil
 }
