@@ -19,7 +19,6 @@ const ActivityLogTableIdentifier = "azure_activity_log"
 // register the table from the package init function
 func init() {
 	table.RegisterTable[*rows.ActivityLog, *ActivityLogTable]()
-	// (NewActivityLogTable)
 }
 
 type ActivityLogTable struct {
@@ -60,7 +59,7 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	row.TpIngestTimestamp = time.Now()
 	row.TpPartition = c.Identifier()
 	row.TpIndex = *row.SubscriptionID
-	row.TpSourceType = sources.ActivityLogAPISourceIdentifier
+	row.TpSourceType = ActivityLogTableIdentifier
 
 	// Hive Fields
 	row.TpDate = row.EventTimestamp.Truncate(24 * time.Hour)

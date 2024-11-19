@@ -96,6 +96,7 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 			}
 
 			if err := s.OnRow(ctx, row, collectionStateJSON); err != nil {
+				// TODO #errorHandling - this does not bubble up
 				return fmt.Errorf("failed to processing row: %w", err)
 			}
 		}
