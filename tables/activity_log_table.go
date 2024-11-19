@@ -49,9 +49,7 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 		return nil, fmt.Errorf("ActivityLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
 	}
 
-	if sourceEnrichmentFields.TpIndex == "" {
-		return nil, fmt.Errorf("source must provide connection in sourceEnrichmentFields")
-	}
+	row.CommonFields = *sourceEnrichmentFields
 
 	// Record Standardization
 	row.TpID = xid.New().String()
@@ -59,7 +57,6 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	row.TpIngestTimestamp = time.Now()
 	row.TpPartition = c.Identifier()
 	row.TpIndex = *row.SubscriptionID
-	row.TpSourceType = ActivityLogTableIdentifier
 
 	// Hive Fields
 	row.TpDate = row.EventTimestamp.Truncate(24 * time.Hour)

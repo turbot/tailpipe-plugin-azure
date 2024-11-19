@@ -52,9 +52,9 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 
 	tpSource := fmt.Sprint(ActivityLogAPISourceIdentifier)
 	sourceEnrichmentFields := &enrichment.CommonFields{
-		TpSourceType: ActivityLogAPISourceIdentifier,
-		TpIndex:      *s.Config.SubscriptionId,
-		TpSourceName: &tpSource,
+		TpSourceType:     ActivityLogAPISourceIdentifier,
+		TpSourceName:     &tpSource,
+		TpSourceLocation: s.Config.TenantId,
 	}
 
 	endTime := time.Now()
