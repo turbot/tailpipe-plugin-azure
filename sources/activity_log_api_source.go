@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
+
+	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
@@ -19,19 +20,18 @@ const ActivityLogAPISourceIdentifier = "azure_activity_log_api"
 // register the source from the package init function
 func init() {
 	row_source.RegisterRowSource[*ActivityLogAPISource]()
-	//(NewActivityLogAPISource)
 }
 
 type ActivityLogAPISource struct {
-	row_source.RowSourceImpl[*ActivityLogAPISourceConfig]
+	row_source.RowSourceImpl[*ActivityLogAPISourceConfig, *config.AzureConnection]
 }
 
-func (s *ActivityLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *ActivityLogAPISource) Init(ctx context.Context, configData config_data.ConfigData, connectionData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
 	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
-	return s.RowSourceImpl.Init(ctx, configData, opts...)
+	return s.RowSourceImpl.Init(ctx, configData, connectionData, opts...)
 }
 
 func (s *ActivityLogAPISource) Identifier() string {
@@ -45,16 +45,15 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	collectionState.HasContinuation = true
 	collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
 
-	client, err := s.getClient() // client doesn't have a Close() method, nothing to defer
+	client, err := s.getClient(ctx) // client doesn't have a Close() method, nothing to defer
 	if err != nil {
 		return err
 	}
 
-	tpSource := fmt.Sprint(ActivityLogAPISourceIdentifier)
+	tpSource := ActivityLogAPISourceIdentifier
 	sourceEnrichmentFields := &enrichment.CommonFields{
-		TpSourceType:     ActivityLogAPISourceIdentifier,
-		TpSourceName:     &tpSource,
-		TpSourceLocation: s.Config.TenantId,
+		TpSourceType: ActivityLogAPISourceIdentifier,
+		TpSourceName: &tpSource,
 	}
 
 	endTime := time.Now()
@@ -105,14 +104,13 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	return nil
 }
 
-func (s *ActivityLogAPISource) getClient() (*armmonitor.ActivityLogsClient, error) {
-	// TODO: #authentication support other authentication methods
-	cred, err := azidentity.NewClientSecretCredential(*s.Config.TenantId, *s.Config.ClientId, *s.Config.ClientSecret, nil)
+func (s *ActivityLogAPISource) getClient(_ context.Context) (*armmonitor.ActivityLogsClient, error) {
+	sess, err := s.Connection.GetSession()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client secret credential: %w", err)
+		return nil, fmt.Errorf("failed to get session: %w", err)
 	}
 
-	client, err := armmonitor.NewActivityLogsClient(*s.Config.SubscriptionId, cred, nil)
+	client, err := armmonitor.NewActivityLogsClient(sess.SubscriptionID, sess.Credential, sess.ClientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create activity logs client: %w", err)
 	}
