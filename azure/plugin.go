@@ -4,7 +4,7 @@ import (
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
-	
+
 	// reference the table package to ensure that the tables are registered by the init functions
 	_ "github.com/turbot/tailpipe-plugin-azure/sources"
 	_ "github.com/turbot/tailpipe-plugin-azure/tables"
@@ -22,7 +22,7 @@ func NewPlugin() (_ plugin.TailpipePlugin, err error) {
 	}()
 
 	p := &Plugin{
-		PluginImpl: plugin.NewPluginImpl[*config.AzureConnection]("azure"),
+		PluginImpl: plugin.NewPluginImpl(config.PluginName),
 	}
 
 	return p, nil
