@@ -6,7 +6,6 @@ import (
 
 	"github.com/rs/xid"
 
-	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-azure/mappers"
 	"github.com/turbot/tailpipe-plugin-azure/rows"
 	"github.com/turbot/tailpipe-plugin-azure/sources"
@@ -18,18 +17,21 @@ const ActivityLogTableIdentifier = "azure_activity_log"
 
 // register the table from the package init function
 func init() {
-	table.RegisterTable[*rows.ActivityLog, *ActivityLogTable]()
+	// Register the table, with type parameters:
+	// 1. row struct
+	// 2. table config struct
+	// 3. table implementation
+	table.RegisterTable[*rows.ActivityLog, *ActivityLogTableConfig, *ActivityLogTable]()
 }
 
 type ActivityLogTable struct {
-	table.TableImpl[*rows.ActivityLog, *ActivityLogTableConfig, *config.AzureConnection]
 }
 
 func (c *ActivityLogTable) Identifier() string {
 	return ActivityLogTableIdentifier
 }
 
-func (c *ActivityLogTable) SupportedSources() []*table.SourceMetadata[*rows.ActivityLog] {
+func (c *ActivityLogTable) SupportedSources(_ *ActivityLogTableConfig) []*table.SourceMetadata[*rows.ActivityLog] {
 	return []*table.SourceMetadata[*rows.ActivityLog]{
 		{
 			SourceName: sources.ActivityLogAPISourceIdentifier,
