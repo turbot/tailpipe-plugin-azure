@@ -20,7 +20,7 @@ func (m *ActivityLogMapper) Identifier() string {
 	return "azure_activity_log_mapper"
 }
 
-func (m *ActivityLogMapper) Map(_ context.Context, a any) ([]*rows.ActivityLog, error) {
+func (m *ActivityLogMapper) Map(_ context.Context, a any) (*rows.ActivityLog, error) {
 	logEntry, ok := a.(*armmonitor.EventData)
 	if !ok {
 		return nil, fmt.Errorf("invalid row type: %T, expected *armmonitor.EventData", a)
@@ -79,5 +79,5 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any) ([]*rows.ActivityLog, 
 		row.Properties = &logEntry.Properties
 	}
 
-	return []*rows.ActivityLog{row}, nil
+	return row, nil
 }
