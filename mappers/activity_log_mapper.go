@@ -29,7 +29,7 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any) (*rows.ActivityLog, er
 	var row rows.ActivityLog
 
 	if logEntry.Authorization != nil {
-		row.Authorization = &rows.ActivityLogAuthorization{
+		row.AuthorizationInfo = &rows.ActivityLogAuthorization{
 			Action: logEntry.Authorization.Action,
 			Scope:  logEntry.Authorization.Scope,
 			Role:   logEntry.Authorization.Role,

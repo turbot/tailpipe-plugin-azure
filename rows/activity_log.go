@@ -9,7 +9,7 @@ import (
 type ActivityLog struct {
 	enrichment.CommonFields
 
-	Authorization        *ActivityLogAuthorization `json:"authorization,omitempty"`
+	AuthorizationInfo    *ActivityLogAuthorization `json:"authorization_info,omitempty"`
 	Caller               *string                   `json:"caller"`
 	Category             *string                   `json:"category"`
 	Claims               *map[string]*string       `json:"claims,omitempty" parquet:"type=JSON"`
