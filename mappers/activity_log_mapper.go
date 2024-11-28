@@ -26,12 +26,23 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any) (*rows.ActivityLog, er
 		return nil, fmt.Errorf("invalid row type: %T, expected *armmonitor.EventData", a)
 	}
 
-	row := rows.NewActivityLog()
+	var row rows.ActivityLog
 
 	if logEntry.Authorization != nil {
-		row.AuthorizationAction = logEntry.Authorization.Action
-		row.AuthorizationScope = logEntry.Authorization.Scope
-		row.AuthorizationRole = logEntry.Authorization.Role
+		row.Authorization = &rows.ActivityLogAuthorization{
+			Action: logEntry.Authorization.Action,
+			Scope:  logEntry.Authorization.Scope,
+			Role:   logEntry.Authorization.Role,
+		}
+	}
+
+	if logEntry.HTTPRequest != nil {
+		row.HttpRequest = &rows.ActivityLogHttpRequest{
+			ClientIpAddress: logEntry.HTTPRequest.ClientIPAddress,
+			ClientRequestId: logEntry.HTTPRequest.ClientRequestID,
+			Method:          logEntry.HTTPRequest.Method,
+			Uri:             logEntry.HTTPRequest.URI,
+		}
 	}
 
 	row.Caller = logEntry.Caller
@@ -79,5 +90,5 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any) (*rows.ActivityLog, er
 		row.Properties = &logEntry.Properties
 	}
 
-	return row, nil
+	return &row, nil
 }

@@ -56,12 +56,20 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	// Record Standardization
 	row.TpID = xid.New().String()
 	row.TpTimestamp = *row.EventTimestamp
+	row.TpDate = row.EventTimestamp.Truncate(24 * time.Hour)
 	row.TpIngestTimestamp = time.Now()
-	row.TpPartition = c.Identifier()
 	row.TpIndex = *row.SubscriptionID
 
-	// Hive Fields
-	row.TpDate = row.EventTimestamp.Truncate(24 * time.Hour)
+	if row.HttpRequest != nil {
+		if row.HttpRequest.ClientIpAddress != nil {
+			row.TpSourceIP = row.HttpRequest.ClientIpAddress
+			row.TpIps = append(row.TpIps, *row.HttpRequest.ClientIpAddress)
+		}
+	}
+
+	if row.ResourceID != nil {
+		row.TpAkas = append(row.TpAkas, *row.ResourceID)
+	}
 
 	return row, nil
 }
