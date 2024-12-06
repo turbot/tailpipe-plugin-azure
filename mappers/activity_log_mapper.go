@@ -7,14 +7,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 
 	"github.com/turbot/tailpipe-plugin-azure/rows"
-	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
 type ActivityLogMapper struct{}
-
-func NewActivityLogMapper() table.Mapper[*rows.ActivityLog] {
-	return &ActivityLogMapper{}
-}
 
 func (m *ActivityLogMapper) Identifier() string {
 	return "azure_activity_log_mapper"
