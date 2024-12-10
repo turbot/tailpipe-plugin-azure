@@ -76,13 +76,15 @@ func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
 		for _, blob := range page.Segment.BlobItems {
 			objPath := *blob.Name
 			if s.Extensions.IsValid(objPath) {
-				sourceEnrichmentFields := &enrichment.CommonFields{
-					TpSourceLocation: &objPath,
-					TpSourceName:     &s.Config.Container,
-					TpSourceType:     AzureBlobStorageSourceIdentifier,
+				sourceEnrichmentFields := &enrichment.SourceEnrichment{
+					CommonFields: enrichment.CommonFields{
+						TpSourceLocation: &objPath,
+						TpSourceName:     &s.Config.Container,
+						TpSourceType:     AzureBlobStorageSourceIdentifier,
+					},
 				}
 
-				info := &types.ArtifactInfo{Name: objPath, OriginalName: objPath, EnrichmentFields: sourceEnrichmentFields}
+				info := &types.ArtifactInfo{Name: objPath, OriginalName: objPath, SourceEnrichment: sourceEnrichmentFields}
 
 				if err = s.OnArtifactDiscovered(ctx, info); err != nil {
 					// TODO: #error should we continue or fail?
@@ -121,7 +123,7 @@ func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *typ
 
 	}
 
-	downloadInfo := &types.ArtifactInfo{Name: localFilePath, OriginalName: info.Name, EnrichmentFields: info.EnrichmentFields}
+	downloadInfo := &types.ArtifactInfo{Name: localFilePath, OriginalName: info.Name, SourceEnrichment: info.SourceEnrichment}
 
 	return s.OnArtifactDownloaded(ctx, downloadInfo)
 }

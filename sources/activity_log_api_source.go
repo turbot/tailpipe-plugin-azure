@@ -51,9 +51,11 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	}
 
 	tpSource := ActivityLogAPISourceIdentifier
-	sourceEnrichmentFields := &enrichment.CommonFields{
-		TpSourceType: ActivityLogAPISourceIdentifier,
-		TpSourceName: &tpSource,
+	sourceEnrichmentFields := &enrichment.SourceEnrichment{
+		CommonFields: enrichment.CommonFields{
+			TpSourceType: ActivityLogAPISourceIdentifier,
+			TpSourceName: &tpSource,
+		},
 	}
 
 	endTime := time.Now()
@@ -83,8 +85,8 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 			}
 
 			row := &types.RowData{
-				Data:     logEntry,
-				Metadata: sourceEnrichmentFields,
+				Data:             logEntry,
+				SourceEnrichment: sourceEnrichmentFields,
 			}
 
 			// update collection state

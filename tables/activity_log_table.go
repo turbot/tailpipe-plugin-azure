@@ -1,7 +1,6 @@
 package tables
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rs/xid"
@@ -31,27 +30,17 @@ func (c *ActivityLogTable) Identifier() string {
 	return ActivityLogTableIdentifier
 }
 
-func (c *ActivityLogTable) SupportedSources(_ *ActivityLogTableConfig) []*table.SourceMetadata[*rows.ActivityLog] {
+func (c *ActivityLogTable) GetSourceMetadata(_ *ActivityLogTableConfig) []*table.SourceMetadata[*rows.ActivityLog] {
 	return []*table.SourceMetadata[*rows.ActivityLog]{
 		{
 			SourceName: sources.ActivityLogAPISourceIdentifier,
-			MapperFunc: mappers.NewActivityLogMapper,
+			Mapper:     &mappers.ActivityLogMapper{},
 		},
 	}
 }
 
-func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFields *enrichment.CommonFields) (*rows.ActivityLog, error) {
-
-	// we expect sourceEnrichmentFields to be set
-	if sourceEnrichmentFields == nil {
-		return nil, fmt.Errorf("ActivityLogTable EnrichRow called with nil sourceEnrichmentFields")
-	}
-	// we expect name to be set by the Source
-	if sourceEnrichmentFields.TpSourceName == nil {
-		return nil, fmt.Errorf("ActivityLogTable EnrichRow called with TpSourceName unset in sourceEnrichmentFields")
-	}
-
-	row.CommonFields = *sourceEnrichmentFields
+func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, _ *ActivityLogTableConfig, sourceEnrichmentFields enrichment.SourceEnrichment) (*rows.ActivityLog, error) {
+	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// Record Standardization
 	row.TpID = xid.New().String()
