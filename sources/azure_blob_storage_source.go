@@ -100,7 +100,6 @@ func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
 func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *types.ArtifactInfo) error {
 	blobClient := s.client.ServiceClient().NewContainerClient(s.Config.Container).NewBlobClient(info.Name)
 
-	slog.Error("Container name:", info.Name, "done")
 	localFilePath := path.Join(s.TmpDir, info.Name)
 	if err := os.MkdirAll(path.Dir(localFilePath), 0755); err != nil {
 		return fmt.Errorf("failed to create directory for file, %w", err)
