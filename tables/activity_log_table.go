@@ -4,11 +4,10 @@ import (
 	"time"
 
 	"github.com/rs/xid"
-
 	"github.com/turbot/tailpipe-plugin-azure/mappers"
 	"github.com/turbot/tailpipe-plugin-azure/rows"
 	"github.com/turbot/tailpipe-plugin-azure/sources"
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
@@ -39,7 +38,7 @@ func (c *ActivityLogTable) GetSourceMetadata(_ *ActivityLogTableConfig) []*table
 	}
 }
 
-func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, _ *ActivityLogTableConfig, sourceEnrichmentFields enrichment.SourceEnrichment) (*rows.ActivityLog, error) {
+func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, _ *ActivityLogTableConfig, sourceEnrichmentFields schema.SourceEnrichment) (*rows.ActivityLog, error) {
 	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// Record Standardization

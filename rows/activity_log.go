@@ -3,11 +3,11 @@ package rows
 import (
 	"time"
 
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 )
 
 type ActivityLog struct {
-	enrichment.CommonFields
+	schema.CommonFields
 
 	AuthorizationInfo    *ActivityLogAuthorization `json:"authorization_info,omitempty"`
 	Caller               *string                   `json:"caller"`

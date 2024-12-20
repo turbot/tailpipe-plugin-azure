@@ -6,12 +6,11 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
-
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/config_data"
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
@@ -51,8 +50,8 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	}
 
 	tpSource := ActivityLogAPISourceIdentifier
-	sourceEnrichmentFields := &enrichment.SourceEnrichment{
-		CommonFields: enrichment.CommonFields{
+	sourceEnrichmentFields := &schema.SourceEnrichment{
+		CommonFields: schema.CommonFields{
 			TpSourceType: ActivityLogAPISourceIdentifier,
 			TpSourceName: &tpSource,
 		},
