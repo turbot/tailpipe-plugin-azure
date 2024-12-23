@@ -19,7 +19,7 @@ func init() {
 	// 1. row struct
 	// 2. table config struct
 	// 3. table implementation
-	table.RegisterTable[*rows.ActivityLog, *ActivityLogTableConfig, *ActivityLogTable]()
+	table.RegisterTable[*rows.ActivityLog, *ActivityLogTable]()
 }
 
 type ActivityLogTable struct {
@@ -29,7 +29,7 @@ func (c *ActivityLogTable) Identifier() string {
 	return ActivityLogTableIdentifier
 }
 
-func (c *ActivityLogTable) GetSourceMetadata(_ *ActivityLogTableConfig) []*table.SourceMetadata[*rows.ActivityLog] {
+func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.ActivityLog] {
 	return []*table.SourceMetadata[*rows.ActivityLog]{
 		{
 			SourceName: sources.ActivityLogAPISourceIdentifier,
@@ -38,7 +38,7 @@ func (c *ActivityLogTable) GetSourceMetadata(_ *ActivityLogTableConfig) []*table
 	}
 }
 
-func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, _ *ActivityLogTableConfig, sourceEnrichmentFields schema.SourceEnrichment) (*rows.ActivityLog, error) {
+func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFields schema.SourceEnrichment) (*rows.ActivityLog, error) {
 	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// Record Standardization
