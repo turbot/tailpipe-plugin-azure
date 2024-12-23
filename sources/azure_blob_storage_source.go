@@ -11,7 +11,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
-	"github.com/turbot/tailpipe-plugin-sdk/config_data"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
@@ -32,7 +31,7 @@ type AzureBlobStorageSource struct {
 	client     *azblob.Client
 }
 
-func (s *AzureBlobStorageSource) Init(ctx context.Context, configData, connectionData config_data.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *AzureBlobStorageSource) Init(ctx context.Context, configData, connectionData types.ConfigData, opts ...row_source.RowSourceOption) error {
 	// call base to parse config and apply options
 	if err := s.ArtifactSourceImpl.Init(ctx, configData, connectionData, opts...); err != nil {
 		return err
