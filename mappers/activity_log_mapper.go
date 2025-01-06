@@ -3,9 +3,9 @@ package mappers
 import (
 	"context"
 	"fmt"
+	"github.com/turbot/tailpipe-plugin-sdk/table"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
-
 	"github.com/turbot/tailpipe-plugin-azure/rows"
 )
 
@@ -15,7 +15,7 @@ func (m *ActivityLogMapper) Identifier() string {
 	return "azure_activity_log_mapper"
 }
 
-func (m *ActivityLogMapper) Map(_ context.Context, a any) (*rows.ActivityLog, error) {
+func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*rows.ActivityLog]) (*rows.ActivityLog, error) {
 	logEntry, ok := a.(*armmonitor.EventData)
 	if !ok {
 		return nil, fmt.Errorf("invalid row type: %T, expected *armmonitor.EventData", a)

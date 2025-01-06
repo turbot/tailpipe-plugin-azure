@@ -9,12 +9,11 @@ import (
 	"path"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
-
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/config_data"
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
@@ -76,8 +75,8 @@ func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
 		for _, blob := range page.Segment.BlobItems {
 			objPath := *blob.Name
 			if s.Extensions.IsValid(objPath) {
-				sourceEnrichmentFields := &enrichment.SourceEnrichment{
-					CommonFields: enrichment.CommonFields{
+				sourceEnrichmentFields := &schema.SourceEnrichment{
+					CommonFields: schema.CommonFields{
 						TpSourceLocation: &objPath,
 						TpSourceName:     &s.Config.Container,
 						TpSourceType:     AzureBlobStorageSourceIdentifier,
