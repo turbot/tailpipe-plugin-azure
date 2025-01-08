@@ -1,6 +1,7 @@
 package tables
 
 import (
+	"strings"
 	"time"
 
 	"github.com/rs/xid"
@@ -46,7 +47,12 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 	row.TpTimestamp = *row.EventTimestamp
 	row.TpDate = row.EventTimestamp.Truncate(24 * time.Hour)
 	row.TpIngestTimestamp = time.Now()
-	row.TpIndex = *row.SubscriptionID
+	if row.SubscriptionID != nil {
+		subId := strings.ToLower(*row.SubscriptionID)
+		row.TpIndex = subId
+	} else {
+		row.TpIndex = "default"
+	}
 
 	if row.HttpRequest != nil {
 		if row.HttpRequest.ClientIpAddress != nil {
