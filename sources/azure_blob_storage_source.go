@@ -9,6 +9,7 @@ import (
 	"path"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"

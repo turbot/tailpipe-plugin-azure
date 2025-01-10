@@ -47,3 +47,44 @@ type ActivityLogHttpRequest struct {
 	Method          *string `json:"method,omitempty"`
 	Uri             *string `json:"uri,omitempty"`
 }
+
+// Storage account log structure
+
+type Identity struct {
+	Authorization Authorization `json:"authorization,omitempty"`
+	Claims        *map[string]interface{} `json:"claims,omitempty"` // Dynamic structure
+}
+
+type Authorization struct {
+	Scope              *string      `json:"scope,omitempty"`
+	Action             *string      `json:"action,omitempty"`
+	Evidence           Evidence    `json:"evidence,omitempty"`
+}
+
+type Evidence struct {
+	Role                  *string `json:"role,omitempty"`
+	RoleAssignmentScope   *string `json:"roleAssignmentScope,omitempty"`
+	RoleAssignmentID      *string `json:"roleAssignmentId,omitempty"`
+	RoleDefinitionID      *string `json:"roleDefinitionId,omitempty"`
+	PrincipalID           *string `json:"principalId,omitempty"`
+	PrincipalType         *string `json:"principalType,omitempty"`
+}
+
+type AzureStorageAccountLog struct {
+	RoleLocation    *string                 `json:"RoleLocation,omitempty"`
+	Stamp           *string                 `json:"Stamp,omitempty"`
+	ReleaseVersion  *string                 `json:"ReleaseVersion,omitempty"`
+	Time            *time.Time              `json:"time,omitempty"`
+	ResourceID      *string                 `json:"resourceId,omitempty"`
+	OperationName   *string                 `json:"operationName,omitempty"`
+	Category        *string                 `json:"category,omitempty"`
+	ResultType      *string                 `json:"resultType,omitempty"`
+	ResultSignature *string                 `json:"resultSignature,omitempty"`
+	DurationMs      *string                 `json:"durationMs,omitempty"`
+	CallerIPAddress *string                 `json:"callerIpAddress,omitempty"`
+	CorrelationID   *string                 `json:"correlationId,omitempty"`
+	Identity        *Identity               `json:"identity,omitempty"`
+	Level           *string                 `json:"level,omitempty"`
+	Properties      *map[string]interface{} `json:"properties,omitempty"` // Dynamic structure
+	TenantID        *string                 `json:"tenantId,omitempty"`
+}
