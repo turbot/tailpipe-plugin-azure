@@ -12,8 +12,8 @@ import (
 	"github.com/turbot/tailpipe-plugin-azure/sources"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source_config"
-	"github.com/turbot/tailpipe-plugin-sdk/enrichment"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
+	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
@@ -35,7 +35,7 @@ func (c *ActivityLogTable) Identifier() string {
 	return ActivityLogTableIdentifier
 }
 
-func (c *ActivityLogTable) GetSourceMetadata(_ *ActivityLogTableConfig) []*table.SourceMetadata[*rows.ActivityLog] {
+func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.ActivityLog] {
 
 	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigBase{
 		FileLayout: utils.ToStringPointer("/resourceId=/SUBSCRIPTIONS/[A-F0-9-]+/y=\\d{4}/m=\\d{2}/d=\\d{2}/h=\\d{2}/m=\\d{2}/PT\\d+H\\.json"),
