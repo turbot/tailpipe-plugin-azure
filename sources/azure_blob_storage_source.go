@@ -32,13 +32,12 @@ type AzureBlobStorageSource struct {
 	client     *azblob.Client
 }
 
-func (s *AzureBlobStorageSource) Init(ctx context.Context, configData, connectionData types.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *AzureBlobStorageSource) Init(ctx context.Context, params *row_source.RowSourceParams, opts ...row_source.RowSourceOption) error {
 	// call base to parse config and apply options
-	if err := s.ArtifactSourceImpl.Init(ctx, configData, connectionData, opts...); err != nil {
+	if err := s.ArtifactSourceImpl.Init(ctx, params, opts...); err != nil {
 		return err
 	}
 
-	s.TmpDir = path.Join(artifact_source.BaseTmpDir, fmt.Sprintf("azure-blob-%s-%s", s.Config.AccountName, s.Config.Container))
 	s.Extensions = types.NewExtensionLookup(s.Config.Extensions)
 
 	client, err := s.getClient(ctx)
@@ -56,7 +55,9 @@ func (s *AzureBlobStorageSource) Identifier() string {
 }
 
 func (s *AzureBlobStorageSource) Close() error {
-	return nil // s.client has no Close / Finalizer method
+	// delete any temp files
+	_ = os.RemoveAll(s.TempDir)
+	return nil
 }
 
 func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
@@ -83,7 +84,7 @@ func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
 					},
 				}
 
-				info := &types.ArtifactInfo{Name: objPath, OriginalName: objPath, SourceEnrichment: sourceEnrichmentFields}
+				info := &types.ArtifactInfo{LocalName: objPath, OriginalName: objPath, SourceEnrichment: sourceEnrichmentFields}
 
 				if err = s.OnArtifactDiscovered(ctx, info); err != nil {
 					// TODO: #error should we continue or fail?
@@ -98,9 +99,9 @@ func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
 }
 
 func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *types.ArtifactInfo) error {
-	blobClient := s.client.ServiceClient().NewContainerClient(s.Config.Container).NewBlobClient(info.Name)
+	blobClient := s.client.ServiceClient().NewContainerClient(s.Config.Container).NewBlobClient(info.LocalName)
 
-	localFilePath := path.Join(s.TmpDir, info.Name)
+	localFilePath := path.Join(s.TempDir, info.LocalName)
 	if err := os.MkdirAll(path.Dir(localFilePath), 0755); err != nil {
 		return fmt.Errorf("failed to create directory for file, %w", err)
 	}
@@ -122,7 +123,7 @@ func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *typ
 
 	}
 
-	downloadInfo := &types.ArtifactInfo{Name: localFilePath, OriginalName: info.Name, SourceEnrichment: info.SourceEnrichment}
+	downloadInfo := &types.ArtifactInfo{LocalName: localFilePath, OriginalName: info.LocalName, SourceEnrichment: info.SourceEnrichment}
 
 	return s.OnArtifactDownloaded(ctx, downloadInfo)
 }

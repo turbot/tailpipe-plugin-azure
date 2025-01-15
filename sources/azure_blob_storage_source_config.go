@@ -9,7 +9,7 @@ import (
 )
 
 type AzureBlobStorageSourceConfig struct {
-	artifact_source_config.ArtifactSourceConfigBase
+	artifact_source_config.ArtifactSourceConfigImpl
 
 	// required to allow partial decoding
 	Remain hcl.Body `hcl:",remain" json:"-"`

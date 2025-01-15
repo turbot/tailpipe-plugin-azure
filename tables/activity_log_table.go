@@ -37,7 +37,7 @@ func (c *ActivityLogTable) Identifier() string {
 
 func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.ActivityLog] {
 
-	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigBase{
+	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigImpl{
 		FileLayout: utils.ToStringPointer("/resourceId=/SUBSCRIPTIONS/[A-F0-9-]+/y=\\d{4}/m=\\d{2}/d=\\d{2}/h=\\d{2}/m=\\d{2}/PT\\d+H\\.json"),
 	}
 

@@ -24,12 +24,12 @@ type ActivityLogAPISource struct {
 	row_source.RowSourceImpl[*ActivityLogAPISourceConfig, *config.AzureConnection]
 }
 
-func (s *ActivityLogAPISource) Init(ctx context.Context, configData types.ConfigData, connectionData types.ConfigData, opts ...row_source.RowSourceOption) error {
+func (s *ActivityLogAPISource) Init(ctx context.Context, params *row_source.RowSourceParams, opts ...row_source.RowSourceOption) error {
 	// set the collection state ctor
 	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
-	return s.RowSourceImpl.Init(ctx, configData, connectionData, opts...)
+	return s.RowSourceImpl.Init(ctx, params, opts...)
 }
 
 func (s *ActivityLogAPISource) Identifier() string {
@@ -37,11 +37,11 @@ func (s *ActivityLogAPISource) Identifier() string {
 }
 
 func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
-	// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
-	collectionState := s.CollectionState.(*collection_state.TimeRangeCollectionState[*ActivityLogAPISourceConfig])
-	collectionState.IsChronological = false
-	collectionState.HasContinuation = true
-	collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
+	//// NOTE: The API only allows fetching from newest to oldest, so we need to collect in reverse order until we've hit a previously obtain item.
+	//collectionState := s.CollectionState.(*collection_state.DeprecatedTimeRangeCollectionState[*ActivityLogAPISourceConfig])
+	//collectionState.IsChronological = false
+	//collectionState.HasContinuation = true
+	//collectionState.StartCollection() // sets previous state to current state as we manipulate the current state
 
 	client, err := s.getClient(ctx) // client doesn't have a Close() method, nothing to defer
 	if err != nil {
@@ -59,10 +59,10 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	endTime := time.Now()
 	startTime := endTime.Add(-2160 * time.Hour) // 2160hr == 90 days => { "code" : "BadRequest", "message" : "The start time cannot be more than 90 days in the past."}
 
-	if !collectionState.IsEmpty() {
-		latestEndTime := collectionState.GetLatestEndTime()
-		if latestEndTime != nil && latestEndTime.After(startTime) {
-			startTime = *latestEndTime
+	if !s.CollectionState.IsEmpty() {
+		latestEndTime := s.CollectionState.GetEndTime()
+		if !latestEndTime.IsZero() && latestEndTime.After(startTime) {
+			startTime = latestEndTime
 		}
 	}
 
@@ -78,7 +78,7 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 		for _, logEntry := range page.Value {
 
 			// check if we've hit previous item - return false if we have, return from function
-			if !collectionState.ShouldCollectRow(*logEntry.EventTimestamp, *logEntry.ID) {
+			if !s.CollectionState.ShouldCollect(*logEntry.ID, *logEntry.EventTimestamp) {
 				return nil
 			}
 
@@ -88,13 +88,12 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 			}
 
 			// update collection state
-			collectionState.Upsert(*logEntry.EventTimestamp, *logEntry.ID, nil)
-			collectionStateJSON, err := s.GetCollectionStateJSON()
+			err := s.CollectionState.OnCollected(*logEntry.ID, *logEntry.EventTimestamp)
 			if err != nil {
-				return fmt.Errorf("error serialising collectionState data: %w", err)
+				return fmt.Errorf("failed to update collection state: %w", err)
 			}
 
-			if err := s.OnRow(ctx, row, collectionStateJSON); err != nil {
+			if err := s.OnRow(ctx, row); err != nil {
 				// TODO #errorHandling - this does not bubble up
 				return fmt.Errorf("failed to processing row: %w", err)
 			}
