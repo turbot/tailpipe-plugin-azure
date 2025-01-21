@@ -2,18 +2,24 @@ package sources
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/container"
+	"github.com/elastic/go-grok"
 
+	typehelpers "github.com/turbot/go-kit/types"
+	"github.com/turbot/pipe-fittings/filter"
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
-	"github.com/turbot/tailpipe-plugin-sdk/schema"
 	"github.com/turbot/tailpipe-plugin-sdk/types"
 )
 
@@ -28,8 +34,8 @@ func init() {
 type AzureBlobStorageSource struct {
 	artifact_source.ArtifactSourceImpl[*AzureBlobStorageSourceConfig, *config.AzureConnection]
 
-	Extensions types.ExtensionLookup
-	client     *azblob.Client
+	client    *container.Client
+	errorList []error
 }
 
 func (s *AzureBlobStorageSource) Init(ctx context.Context, params *row_source.RowSourceParams, opts ...row_source.RowSourceOption) error {
@@ -38,9 +44,7 @@ func (s *AzureBlobStorageSource) Init(ctx context.Context, params *row_source.Ro
 		return err
 	}
 
-	s.Extensions = types.NewExtensionLookup(s.Config.Extensions)
-
-	client, err := s.getClient(ctx)
+	client, err := s.getClient(ctx, s.Config.Container)
 	if err != nil {
 		return fmt.Errorf("failed to get Azure Blob Storage client: %w", err)
 	}
@@ -61,47 +65,48 @@ func (s *AzureBlobStorageSource) Close() error {
 }
 
 func (s *AzureBlobStorageSource) DiscoverArtifacts(ctx context.Context) error {
-	containerClient := s.client.ServiceClient().NewContainerClient(s.Config.Container)
-	opts := azblob.ListBlobsFlatOptions{
-		Prefix: &s.Config.Prefix,
+	var prefix string
+	layout := typehelpers.SafeString(s.Config.GetFileLayout())
+	// if there are any optional segments, we expand them into all possible combinations
+	optionalLayouts := artifact_source.ExpandPatternIntoOptionalAlternatives(layout)
+
+	filterMap := make(map[string]*filter.SqlFilter)
+
+	g := grok.New()
+	// add any patterns defined in config
+	err := g.AddPatterns(s.Config.GetPatterns())
+	if err != nil {
+		return fmt.Errorf("failed to add grok patterns: %w", err)
 	}
 
-	pager := containerClient.NewListBlobsFlatPager(&opts)
-	for pager.More() {
-		page, err := pager.NextPage(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to list blobs in container: %w", err)
+	if s.Config.Prefix != nil {
+		prefix = *s.Config.Prefix
+		if !strings.HasSuffix(prefix, "/") {
+			prefix = prefix + "/"
 		}
-
-		for _, blob := range page.Segment.BlobItems {
-			objPath := *blob.Name
-			if s.Extensions.IsValid(objPath) {
-				sourceEnrichmentFields := &schema.SourceEnrichment{
-					CommonFields: schema.CommonFields{
-						TpSourceLocation: &objPath,
-						TpSourceName:     &s.Config.Container,
-						TpSourceType:     AzureBlobStorageSourceIdentifier,
-					},
-				}
-
-				info := &types.ArtifactInfo{LocalName: objPath, OriginalName: objPath, SourceEnrichment: sourceEnrichmentFields}
-
-				if err = s.OnArtifactDiscovered(ctx, info); err != nil {
-					// TODO: #error should we continue or fail?
-					return fmt.Errorf("failed to notify observers of discovered artifact, %w", err)
-				}
-			}
+		var newOptionalLayouts []string
+		for _, l := range optionalLayouts {
+			newOptionalLayouts = append(newOptionalLayouts, fmt.Sprintf("%s%s", prefix, l))
 		}
+		optionalLayouts = newOptionalLayouts
+	}
 
+	err = s.walk(ctx, prefix, optionalLayouts, filterMap, g)
+	if err != nil {
+		s.errorList = append(s.errorList, fmt.Errorf("error walking Azure Blob Storage: %w", err))
+	}
+
+	if len(s.errorList) > 0 {
+		return errors.Join(s.errorList...)
 	}
 
 	return nil
 }
 
 func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *types.ArtifactInfo) error {
-	blobClient := s.client.ServiceClient().NewContainerClient(s.Config.Container).NewBlobClient(info.LocalName)
+	blobClient := s.client.NewBlobClient(info.Name)
 
-	localFilePath := path.Join(s.TempDir, info.LocalName)
+	localFilePath := path.Join(s.TempDir, info.Name)
 	if err := os.MkdirAll(path.Dir(localFilePath), 0755); err != nil {
 		return fmt.Errorf("failed to create directory for file, %w", err)
 	}
@@ -111,6 +116,9 @@ func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *typ
 		return fmt.Errorf("failed to download blob: %w", err)
 	}
 	defer resp.Body.Close()
+
+	// Get the size of the object
+	size := typehelpers.Int64Value(resp.ContentLength)
 
 	outFile, err := os.Create(localFilePath)
 	if err != nil {
@@ -123,12 +131,12 @@ func (s *AzureBlobStorageSource) DownloadArtifact(ctx context.Context, info *typ
 
 	}
 
-	downloadInfo := &types.ArtifactInfo{LocalName: localFilePath, OriginalName: info.LocalName, SourceEnrichment: info.SourceEnrichment}
+	downloadInfo := types.NewDownloadedArtifactInfo(info, localFilePath, size)
 
 	return s.OnArtifactDownloaded(ctx, downloadInfo)
 }
 
-func (s *AzureBlobStorageSource) getClient(ctx context.Context) (*azblob.Client, error) {
+func (s *AzureBlobStorageSource) getClient(ctx context.Context, containerName string) (*container.Client, error) {
 	serviceURL := fmt.Sprintf("https://%s.blob.core.windows.net/", s.Config.AccountName)
 
 	sess, err := s.Connection.GetSession()
@@ -141,5 +149,46 @@ func (s *AzureBlobStorageSource) getClient(ctx context.Context) (*azblob.Client,
 		return nil, fmt.Errorf("failed creating Azure Blob Storage client: %w", err)
 	}
 
-	return client, nil
+	c := client.ServiceClient().NewContainerClient(containerName)
+
+	return c, nil
+}
+
+func (s *AzureBlobStorageSource) walk(ctx context.Context, prefix string, layouts []string, filterMap map[string]*filter.SqlFilter, g *grok.Grok) error {
+	opts := container.ListBlobsHierarchyOptions{
+		Prefix: &prefix,
+	}
+	pager := s.client.NewListBlobsHierarchyPager("/", &opts)
+
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return fmt.Errorf("error getting next page, %w", err)
+		}
+
+		// Directories
+		for _, dir := range page.Segment.BlobPrefixes {
+			err = s.WalkNode(ctx, *dir.Name, "", layouts, true, g, filterMap)
+			if err != nil {
+				if errors.Is(err, fs.SkipDir) {
+					continue
+				}
+				return fmt.Errorf("error walking node: %w", err)
+			}
+			err = s.walk(ctx, *dir.Name, layouts, filterMap, g)
+			if err != nil {
+				s.errorList = append(s.errorList, err)
+			}
+		}
+
+		// Files
+		for _, obj := range page.Segment.BlobItems {
+			err = s.WalkNode(ctx, *obj.Name, "", layouts, false, g, filterMap)
+			if err != nil {
+				s.errorList = append(s.errorList, fmt.Errorf("error parsing object %s, %w", *obj.Name, err))
+			}
+		}
+	}
+
+	return nil
 }
