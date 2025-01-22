@@ -38,7 +38,7 @@ func (c *ActivityLogTable) Identifier() string {
 func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.ActivityLog] {
 
 	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigImpl{
-		FileLayout: utils.ToStringPointer("/resourceId=/SUBSCRIPTIONS/[A-F0-9-]+/y=\\d{4}/m=\\d{2}/d=\\d{2}/h=\\d{2}/m=\\d{2}/PT\\d+H\\.json"),
+		FileLayout: utils.ToStringPointer("/SUBSCRIPTIONS/%{DATA:subscription_id}/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json"),
 	}
 
 	return []*table.SourceMetadata[*rows.ActivityLog]{
