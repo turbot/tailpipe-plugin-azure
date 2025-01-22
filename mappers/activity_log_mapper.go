@@ -30,16 +30,20 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*
 			return nil, err
 		}
 		claims := make(map[string]*string)
-		for k, v := range *storageAccLog.Identity.Claims {
-			if val, ok := v.(string); ok {
-				claims[k] = &val
+		if storageAccLog.Identity != nil && storageAccLog.Identity.Claims != nil {
+			for key, value := range *storageAccLog.Identity.Claims {
+				if val, ok := value.(string); ok {
+					claims[key] = &val
+				}
 			}
 		}
 
 		properties := make(map[string]*string)
-		for k, v := range *storageAccLog.Properties {
-			if val, ok := v.(string); ok {
-				properties[k] = &val
+		if storageAccLog.Properties != nil {
+			for key, value := range *storageAccLog.Properties {
+				if val, ok := value.(string); ok {
+					properties[key] = &val
+				}
 			}
 		}
 
@@ -66,14 +70,17 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*
 			SubmissionTimestamp:  storageAccLog.Time,
 			SubscriptionID:       extractSubscriptionID(*storageAccLog.ResourceID), // Extract from ResourceID
 			TenantID:             storageAccLog.TenantID,
-			AuthorizationInfo: &rows.ActivityLogAuthorization{
-				Action: storageAccLog.Identity.Authorization.Action,
-				Scope:  storageAccLog.Identity.Authorization.Scope,
-				Role:   storageAccLog.Identity.Authorization.Evidence.Role,
-			},
 			HttpRequest: &rows.ActivityLogHttpRequest{
 				ClientIpAddress: storageAccLog.CallerIPAddress,
 			},
+		}
+
+		if storageAccLog.Identity != nil {
+			activityLog.AuthorizationInfo = &rows.ActivityLogAuthorization{
+				Action: storageAccLog.Identity.Authorization.Action,
+				Scope:  storageAccLog.Identity.Authorization.Scope,
+				Role:   storageAccLog.Identity.Authorization.Evidence.Role,
+			}
 		}
 
 		row = *activityLog
