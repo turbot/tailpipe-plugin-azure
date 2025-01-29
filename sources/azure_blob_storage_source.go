@@ -16,7 +16,7 @@ import (
 	"github.com/elastic/go-grok"
 
 	typehelpers "github.com/turbot/go-kit/types"
-	"github.com/turbot/pipe-fittings/filter"
+	"github.com/turbot/pipe-fittings/v2/filter"
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
