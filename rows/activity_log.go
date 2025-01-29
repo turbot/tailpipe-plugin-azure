@@ -80,7 +80,6 @@ type AzureStorageAccountLog struct {
 	Category        *string                 `json:"category,omitempty"`
 	ResultType      *string                 `json:"resultType,omitempty"`
 	ResultSignature *string                 `json:"resultSignature,omitempty"`
-	DurationMs      *string                 `json:"durationMs,omitempty"`
 	CallerIPAddress *string                 `json:"callerIpAddress,omitempty"`
 	CorrelationID   *string                 `json:"correlationId,omitempty"`
 	Identity        *Identity               `json:"identity,omitempty"`
