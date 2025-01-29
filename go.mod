@@ -2,21 +2,18 @@ module github.com/turbot/tailpipe-plugin-azure
 
 go 1.23.2
 
-replace github.com/turbot/tailpipe-plugin-sdk => ../tailpipe-plugin-sdk
-
-replace github.com/turbot/pipe-fittings => ../pipe-fittings
-
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.11.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.5.0
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.13
+	github.com/elastic/go-grok v0.3.1
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/rs/xid v1.5.0
 	github.com/turbot/go-kit v0.10.0-rc.0
-	github.com/turbot/pipe-fittings v1.4.1
-	github.com/turbot/tailpipe-plugin-sdk v0.0.0-00010101000000-000000000000
+	github.com/turbot/pipe-fittings/v2 v2.0.0-rc.1
+	github.com/turbot/tailpipe-plugin-sdk v0.1.0-rc.0
 )
 
 require (
@@ -70,7 +67,6 @@ require (
 	github.com/dgraph-io/ristretto v0.2.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/elastic/go-grok v0.3.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
