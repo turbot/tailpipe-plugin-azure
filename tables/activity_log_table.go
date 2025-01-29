@@ -85,3 +85,7 @@ func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFiel
 
 	return row, nil
 }
+
+func (c *ActivityLogTable) GetDescription() string {
+	return "Azure Activity Logs record management operations and user actions performed on Azure resources, providing insight into administrative changes and service health."
+}
