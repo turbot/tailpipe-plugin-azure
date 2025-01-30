@@ -11,61 +11,53 @@ Using this source, you can collect, filter, and analyze logs stored in Azure Blo
 
 ## Example Configurations
 
-### Collect Logs from an Azure Blob Storage Container
+### Collect activity logs
+
+Collect activity logs for all subscriptions.
 
 ```hcl
-connection "azure" "logging_account" {
-  account_name = "my-azure-account"
+connection "azure" "my_subscription" {
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  client_id       = "00000000-0000-0000-0000-000000000000"
+  client_secret   = "my plaintext secret"
 }
 
 partition "azure_activity_log" "my_logs" {
   source "azure_blob_storage" {
-    connection   = connection.azure.logging_account
-    account_name = "my-azure-account"
-    container    = "logs-container"
+    connection   = connection.azure.my_subscription
+    account_name = "storage_account_name"
+    container    = "container_name"
   }
 }
 ```
 
-### Collect Logs with a Prefix Filter
+### Collect logs for a single subscription
+
+Collect logs for a specific subscription.
 
 ```hcl
-partition "azure_activity_log" "my_logs_prefix" {
+partition "azure_activity_log" "my_logs_subscription" {
   source "azure_blob_storage" {
-    connection   = connection.azure.logging_account
-    account_name = "my-azure-account"
-    container    = "logs-container"
-    prefix       = "logs/2024/"
-  }
-}
-```
-
-### Collect Logs with Specific File Extensions
-
-```hcl
-partition "azure_activity_log" "my_logs_extensions" {
-  source "azure_blob_storage" {
-    connection   = connection.azure.logging_account
-    account_name = "my-azure-account"
-    container    = "logs-container"
-    extensions   = [".json", ".log"]
+    connection   = connection.azure.my_subscription
+    account_name = "storage_account_name"
+    container    = "container_name"
+    file_layout  = "/SUBSCRIPTIONS/12345678-1234-1234-1234-123456789012/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json"
   }
 }
 ```
 
 ## Arguments
 
-| Argument      | Required | Default                  | Description                                                                                                                |
-|--------------|----------|--------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| connection   | Yes      |                          | The connection to use for accessing the Azure account.                                                                     |
-| account_name | Yes      |                          | The name of the Azure Blob Storage account to collect logs from.                                                           |
-| container    | Yes      |                          | The name of the container where logs are stored.                                                                           |
-| prefix       | No       | Root of the container   | The prefix to filter objects in the container.                                                                             |
-| extensions   | No       | All files                | The file extensions to collect (e.g., `.json`, `.log`).                                                                    |
+| Argument     | Required | Default                    | Description                                                                                                              |
+|--------------|----------|----------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| account_name | Yes      |                            | The name of the Storage account to collect logs from.                                                                   |
+| connection   | No       | `connection.azure.default` | The [Azure connection](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials) to use to connect to the Azure subscription. |
+| container    | Yes      |                            | The name of the Storage container where logs are stored.                                                                |
+| file_layout  | No       |                            | The Grok pattern that defines the log file structure.                                                                   |
 
 ### Table Defaults
 
 The following tables define their own default values for certain source arguments:
 
-- **[azure_activity_log](https://tailpipe.io/plugins/turbot/azure/tables/azure_activity_log#azure_blob_storage)**
-
+- **[azure_activity_log](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_activity_log#azure_blob_storage)**

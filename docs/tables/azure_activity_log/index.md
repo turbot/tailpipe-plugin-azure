@@ -9,7 +9,7 @@ The `azure_activity_log` table allows you to query data from Azure Activity Logs
 
 ## Configure
 
-Create a [partition](https://tailpipe.io/docs/manage/partition) for `azure_activity_log`:
+Create a [partition](https://tailpipe.io/docs/manage/partition) for `azure_activity_log` ([examples](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_activity_log#example-configurations)):
 
 ```sh
 vi ~/.tailpipe/config/azure.tpc
@@ -17,12 +17,17 @@ vi ~/.tailpipe/config/azure.tpc
 
 ```hcl
 connection "azure" "logging_account" {
-  subscription_id = "my-subscription-id"
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  client_id       = "00000000-0000-0000-0000-000000000000"
+  client_secret   = "my plaintext secret"
 }
 
 partition "azure_activity_log" "my_logs" {
-  source "azure_monitor" {
-    connection = connection.azure.logging_account
+  source "azure_blob_storage" {
+    connection   = connection.azure.logging_account
+    account_name = "storage_account_name"
+    container    = "container_name"
   }
 }
 ```
@@ -43,36 +48,35 @@ tailpipe collect azure_activity_log.my_logs
 
 ## Query
 
-**[Explore 100+ example queries for this table →](https://hub.tailpipe.io/plugins/turbot/azure/queries/azure_activity_log)**
+**[Explore 40+ example queries for this table →](https://hub.tailpipe.io/plugins/turbot/azure/queries/azure_activity_log)**
 
-### Root Activity
+### Role assigments
 
-Find any actions taken by the root user.
+List role assignments to check for unexpected or suspicious role changes.
 
 ```sql
 select
   event_timestamp,
-  event_name,
+  resource_id,
   caller,
   resource_group_name,
-  resource_provider_name,
   subscription_id
 from
   azure_activity_log
 where
-  caller = 'Root'
+  operation_name = 'Microsoft.Authorization/roleAssignments/write'
 order by
   event_timestamp desc;
 ```
 
-### Top 10 Events
+### Top 10 events
 
 List the top 10 events and how many times they were called.
 
 ```sql
 select
-  resource_provider_name as event_source,
-  operation_name as event_name,
+  resource_provider_name,
+  operation_name,
   count(*) as event_count
 from
   azure_activity_log
@@ -84,9 +88,9 @@ order by
 limit 10;
 ```
 
-### High Volume Resource Modifications
+### High volume Storage access requests
 
-Find users generating a high volume of resource modifications to identify potential anomalous activity.
+Find users generating a high volume of Storage access requests to identify potential anomalous activity.
 
 ```sql
 select
@@ -96,7 +100,7 @@ select
 from
   azure_activity_log
 where
-  category = 'Administrative'
+  operation_name = 'Microsoft.Storage/storageAccounts/listKeys/action'
 group by
   caller,
   event_minute
@@ -108,65 +112,82 @@ order by
 
 ## Example Configurations
 
-### Collect logs from Azure Monitor
+### Collect logs from a storage account
 
-Collect Azure Activity Logs using Azure Monitor:
+Collect activity logs stored in a storage account that use the [default blob naming convention](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/activity-log?tabs=powershell#send-to-azure-storage).
 
 ```hcl
+connection "azure" "my_logging_account" {
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  client_id       = "00000000-0000-0000-0000-000000000000"
+  client_secret   = "my plaintext secret"
+}
+
 partition "azure_activity_log" "my_logs" {
-  source "azure_monitor" {
-    connection = connection.azure.logging_account
+  source "azure_blob_storage" {
+    connection   = connection.azure.my_logging_account
+    account_name = "storage_account_name"
+    container    = "container_name"
   }
 }
 ```
 
-### Exclude Read-Only Events
+### Collect logs from Monitor activity logs API
 
-Use the filter argument in your partition to exclude read-only events and reduce log storage size.
+Collect activity logs from the Monitor activity logs API.
 
 ```hcl
-partition "azure_activity_log" "my_logs_write" {
-  # Avoid saving read-only events
-  filter = "status != 'Succeeded'"
+connection "azure" "my_subscription" {
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  client_id       = "00000000-0000-0000-0000-000000000000"
+  client_secret   = "my plaintext secret"
+}
 
-  source "azure_monitor" {
-    connection = connection.azure.logging_account
+partition "azure_activity_log" "my_logs" {
+  source "azure_activity_log_api" {
+    connection = connection.azure.my_subscription
   }
 }
 ```
 
-### Collect logs for all subscriptions in a tenant
+### Exclude read-only events
 
-For a specific tenant, collect logs for all subscriptions.
+Use the filter argument in your partition to exclude specific events and and reduce log storage size.
 
 ```hcl
-partition "azure_activity_log" "my_logs_tenant" {
-  source "azure_monitor"  {
-    connection  = connection.azure.logging_account
+partition "azure_activity_log" "my_logs_filtered" {
+  # Avoid saving unnecessary events, which can drastically reduce local log size
+  filter = "operation_name != 'Microsoft.Storage/storageAccounts/listKeys/action'"
+
+  source "azure_activity_log_api" {
+    connection = connection.azure.my_subscription
   }
 }
 ```
 
 ### Collect logs for a single subscription
 
-For a specific subscription, collect logs for all resource groups.
+Collect logs for a specific subscription.
 
 ```hcl
 partition "azure_activity_log" "my_logs_subscription" {
-  source "azure_monitor"  {
-    connection  = connection.azure.logging_account
-    subscription_id = "my-subscription-id"
+  source "azure_blob_storage" {
+    connection   = connection.azure.my_logging_account
+    account_name = "storage_account_name"
+    container    = "container_name"
+    file_layout  = "/SUBSCRIPTIONS/12345678-1234-1234-1234-123456789012/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json"
   }
 }
 ```
 
 ## Source Defaults
 
-### azure_monitor
+### azure_blob_storage
 
-This table sets the following defaults for the [azure_monitor source](https://tailpipe.io/plugins/turbot/azure/sources/azure_monitor#arguments):
+This table sets the following defaults for the [azure_blob_storage source](https://hub.tailpipe.io/plugins/turbot/azure/sources/azure_blob_storage#arguments):
 
-| Argument      | Default |
-|--------------|---------|
-| log_type     | `AzureActivityLog` |
-
+| Argument    | Default |
+|-------------|---------|
+| file_layout | `/SUBSCRIPTIONS/%{DATA:subscription_id}/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json` |

@@ -41,16 +41,16 @@ vi ~/.tailpipe/config/azure.tpc
 ```
 
 ```hcl
-connection "azure" "azure_auth" {
-  tenant_id       = "my_tenant_id"
-  subscription_id = "my_subscription_id"
-  client_id       = "my_client_id"
-  client_secret   = "my_client_secret"  
+connection "azure" "my_subscription" {
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  client_id       = "00000000-0000-0000-0000-000000000000"
+  client_secret   = "my plaintext secret"
 }
 
-partition "azure_activity_log" "azure_auth" {
+partition "azure_activity_log" "my_logs" {
   source "azure_blob_storage" {
-    connection   = connection.azure.cli_auth
+    connection   = connection.azure.my_subscription
     account_name = "storage_account_name"
     container    = "container_name"
   }
@@ -97,14 +97,13 @@ order by
 | Microsoft.Sql/servers/databases                           | Microsoft.Sql/servers/databases/read                             | 20              |
 | MICROSOFT.CDN/profiles                                    | Microsoft.Resourcehealth/healthevent/Activated/action            | 18              |
 +-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
-
 ```
 
 ## Detections as Code with Powerpipe
 
 Pre-built dashboards and detections for the Azure plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Azure subscriptions.
 
-For example, the [Azure Activity Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-activity-log-detections) scans your Activity logs for anomalies, such as a SQL Server firewall rule getting updated or a change in your Virtual Network infrastructure.
+For example, the [Azure Activity Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-activity-log-detections) scans your activity logs for anomalies, such as a SQL server firewall rule getting updated or a change in your virtual networks.
 
 Dashboards and detections are [open source](https://github.com/topics/tailpipe-mod), allowing easy customization and collaboration.
 
@@ -128,19 +127,19 @@ cd tailpipe-plugin-azure
 
 After making your local changes, build the plugin, which automatically installs the new version to your `~/.tailpipe/plugins` directory:
 
-```
+```sh
 make
 ```
 
 Re-collect your data:
 
-```
+```sh
 tailpipe collect azure_activity_log
 ```
 
 Try it!
 
-```
+```sh
 tailpipe query
 > .inspect azure_activity_log
 ```

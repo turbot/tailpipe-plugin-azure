@@ -51,16 +51,16 @@ vi ~/.tailpipe/config/azure.tpc
 ```
 
 ```hcl
-connection "azure" "azure_auth" {
-  tenant_id       = "my_tenant_id"
-  subscription_id = "my_subscription_id"
-  client_id       = "my_client_id"
-  client_secret   = "my_client_secret"  
+connection "azure" "my_subscription" {
+  tenant_id       = "00000000-0000-0000-0000-000000000000"
+  subscription_id = "00000000-0000-0000-0000-000000000000"
+  client_id       = "00000000-0000-0000-0000-000000000000"
+  client_secret   = "my plaintext secret"
 }
 
-partition "azure_activity_log" "azure_auth" {
+partition "azure_activity_log" "my_logs" {
   source "azure_blob_storage" {
-    connection   = connection.azure.cli_auth
+    connection   = connection.azure.my_subscription
     account_name = "storage_account_name"
     container    = "container_name"
   }
@@ -107,14 +107,13 @@ order by
 | Microsoft.Sql/servers/databases                           | Microsoft.Sql/servers/databases/read                             | 20              |
 | MICROSOFT.CDN/profiles                                    | Microsoft.Resourcehealth/healthevent/Activated/action            | 18              |
 +-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
-
 ```
 
 ## Detections as Code with Powerpipe
 
 Pre-built dashboards and detections for the Azure plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Azure subscriptions.
 
-For example, the [Azure Activity Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-activity-log-detections) scans your Activity logs for anomalies, such as a SQL Server firewall rule getting updated or a change in your Virtual Network infrastructure.
+For example, the [Azure Activity Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-activity-log-detections) scans your activity logs for anomalies, such as a SQL server firewall rule getting updated or a change in your virtual networks.
 
 Dashboards and detections are [open source](https://github.com/topics/tailpipe-mod), allowing easy customization and collaboration.
 
@@ -126,19 +125,24 @@ To get started, choose a mod from the [Powerpipe Hub](https://hub.powerpipe.io/?
 
 ### Arguments
 
-| Item        | Description                                                                                                                                                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Credentials | Use the `az login` command to setup your [Azure Default Connection](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli).                                                                                         |
-| Permissions | Assign the `Reader` and `Reader and Data Access` (if listing storage account keys) roles to your user or service principal in the subscription.                                                                                                                                                                              |
-| Radius      | Each connection represents a single Azure subscription.                                                                                                                                                                         |
-| Resolution  | 1. Credentials explicitly set in a steampipe config file (`~/.steampipe/config/azure.tpc`).<br />2. Credentials specified in [environment variables](#credentials-from-environment-variables), e.g., `AZURE_SUBSCRIPTION_ID`.<br />3. Credentials from the Azure CLI. |
+| Name                   | Type   | Required | Description                                                                      |
+|------------------------|--------|----------|----------------------------------------------------------------------------------|
+| `certificate_password` | String | No       | The password for the certificate file, if required.                              |
+| `certificate_path`     | String | No       | Path to the certificate file used for authentication instead of a client secret. |
+| `client_id`            | String | Yes      | The client ID (Application ID) for authentication using a service principal.     |
+| `client_secret`        | String | No       | The client secret for authentication using a service principal.                  |
+| `environment`          | String | No       | The Azure environment (e.g., `AzurePublicCloud`, `AzureChinaCloud`).             |
+| `password`             | String | No       | The password for authentication when using user-based authentication.            |
+| `subscription_id`      | String | Yes      | The Azure subscription ID for resource access.                                   |
+| `tenant_id`            | String | Yes      | The Entra ID tenant ID.                                                          |
+| `username`             | String | No       | The username for authentication when using user-based authentication.            |
 
 ### Client Secret Credentials
 
 You may specify the tenant ID, subscription ID, client ID, and client secret to authenticate:
 
 - `tenant_id`: Specify the tenant to authenticate with.
-- `subscription_id`: Specify the subscription to query.
+- `subscription_id`: Specify the subscription to connect to.
 - `client_id`: Specify the app client ID to use.
 - `client_secret`: Specify the app secret to use.
 
@@ -159,7 +163,7 @@ connection "azure" "azure_via_sp_secret" {
 You may specify the tenant ID, subscription ID, client ID, certificate path, and certificate password to authenticate:
 
 - `tenant_id`: Specify the tenant to authenticate with.
-- `subscription_id`: Specify the subscription to query.
+- `subscription_id`: Specify the subscription to connect to.
 - `client_id`: Specify the app client ID to use.
 - `certificate_path`: Specify the certificate path to use.
 - `certificate_password`: Specify the certificate password to use.
@@ -184,7 +188,7 @@ connection "azure" "azure_via_sp_cert" {
 You may specify the tenant ID, subscription ID, client ID, username, and password to authenticate:
 
 - `tenant_id`: Specify the tenant to authenticate with.
-- `subscription_id`: Specify the subscription to query.
+- `subscription_id`: Specify the subscription to connect to.
 - `client_id`: Specify the app client ID to use.
 - `username`: Specify the username to use.
 - `password`: Specify the password to use.
@@ -204,10 +208,10 @@ connection "azure" "password_not_recommended" {
 
 ### Azure Managed Identity
 
-Steampipe works with managed identities (formerly known as Managed Service Identity), provided it is running in Azure, e.g., on a VM. All configuration is handled by Azure. See [Azure Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) for more details.
+Tailpipe works with managed identities (formerly known as Managed Service Identity), provided it is running in Azure, e.g., on a VM. All configuration is handled by Azure. See [Azure Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) for more details.
 
 - `tenant_id`: Specify the tenant to authenticate with.
-- `subscription_id`: Specify the subscription to query.
+- `subscription_id`: Specify the subscription to connect to.
 - `client_id`: Specify the app client ID of managed identity to use.
 
 #### azure.tpc:
@@ -224,14 +228,6 @@ connection "azure" "azure_msi" {
 ### Azure CLI
 
 If no credentials are specified and the SDK environment variables are not set, the plugin will use the active credentials from the Azure CLI. You can run `az login` to set up these credentials.
-
-- `subscription_id`: Specifies the subscription to connect to. If not set, use the subscription ID set in the Azure CLI (`az account show`)
-
-#### azure.tpc:
-
-```hcl
-connection "azure" "cli_auth" {}
-```
 
 ### Credentials from Environment Variables
 
