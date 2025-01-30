@@ -1,11 +1,11 @@
 ---
-title: "Tailpipe Table: azure_activity_log - Query Azure Activity Logs"
-description: "Azure Activity Logs capture administrative actions, policy changes, and security events within your Azure environment."
+title: "Tailpipe Table: azure_activity_log - Query Azure activity logs"
+description: "Azure activity logs capture administrative actions, policy changes, and security events within your Azure environment."
 ---
 
-# Table: azure_activity_log - Query Azure Activity Logs
+# Table: azure_activity_log - Query Azure activity logs
 
-The `azure_activity_log` table allows you to query data from Azure Activity Logs. This table provides detailed information about API calls, resource modifications, security events, and administrative actions within your Azure environment.
+The `azure_activity_log` table allows you to query data from Azure activity logs. This table provides detailed information about API calls, resource modifications, security events, and administrative actions within your Azure environment.
 
 ## Configure
 

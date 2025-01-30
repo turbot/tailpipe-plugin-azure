@@ -119,8 +119,6 @@ Dashboards and detections are [open source](https://github.com/topics/tailpipe-m
 
 To get started, choose a mod from the [Powerpipe Hub](https://hub.powerpipe.io/?engines=tailpipe&q=azure).
 
-<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_mitre_dashboard.png"/>
-
 ## Connection Credentials
 
 ### Arguments
@@ -231,10 +229,11 @@ If no credentials are specified and the SDK environment variables are not set, t
 
 ### Credentials from Environment Variables
 
-The Azure AD plugin will use the standard Azure environment variables to obtain credentials **only if other arguments (`tenant_id`, `client_id`, `client_secret`, `certificate_path`, etc..) are not specified** in the connection:
+The Azure plugin will use the standard Azure environment variables to obtain credentials **only if other arguments (`tenant_id`, `client_id`, `client_secret`, `certificate_path`, etc..) are not specified** in the connection:
 
 ```sh
-export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD" # Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD" and "AZUREUSGOVERNMENTCLOUD"
+# Defaults to "AZUREPUBLICCLOUD". Valid environments are "AZUREPUBLICCLOUD", "AZURECHINACLOUD" and "AZUREUSGOVERNMENTCLOUD"
+export AZURE_ENVIRONMENT="AZUREPUBLICCLOUD"
 export AZURE_TENANT_ID="00000000-0000-0000-0000-000000000000"
 export AZURE_SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000"
 export AZURE_CLIENT_ID="00000000-0000-0000-0000-000000000000"

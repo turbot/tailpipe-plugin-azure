@@ -13,6 +13,8 @@ Using this source, you can collect, filter, and analyze logs retrieved from the 
 
 ### Collect activity logs
 
+Collect activity logs for a subscription.
+
 ```hcl
 connection "azure" "my_subscription" {
   tenant_id       = "00000000-0000-0000-0000-000000000000"
@@ -30,6 +32,6 @@ partition "azure_activity_log" "my_logs" {
 
 ## Arguments
 
-| Argument        | Required | Default                  | Description                                                                                                                 |
-|-----------------|----------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| connection      | No       |                          | The connection to use for accessing the Azure account.                                                                     |
+| Argument   | Required | Default                    | Description                                                                                                                 |
+|------------|----------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| connection | No       | `connection.azure.default` | The [Azure connection](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials) to use to connect to the Azure subscription. |
