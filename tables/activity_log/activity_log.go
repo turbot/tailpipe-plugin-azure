@@ -1,4 +1,4 @@
-package rows
+package activity_log
 
 import (
 	"time"

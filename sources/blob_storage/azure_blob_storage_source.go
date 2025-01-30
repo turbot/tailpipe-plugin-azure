@@ -1,4 +1,4 @@
-package sources
+package blob_storage
 
 import (
 	"context"
@@ -24,11 +24,6 @@ import (
 )
 
 const AzureBlobStorageSourceIdentifier = "azure_blob_storage"
-
-// register the source from the package init function
-func init() {
-	row_source.RegisterRowSource[*AzureBlobStorageSource]()
-}
 
 // AzureBlobStorageSource is a [ArtifactSource] implementation that reads artifacts from an Azure Blob Storage container
 type AzureBlobStorageSource struct {

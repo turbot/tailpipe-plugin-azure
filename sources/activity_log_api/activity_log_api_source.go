@@ -1,4 +1,4 @@
-package sources
+package activity_log_api
 
 import (
 	"context"
@@ -15,11 +15,6 @@ import (
 )
 
 const ActivityLogAPISourceIdentifier = "azure_activity_log_api"
-
-// register the source from the package init function
-func init() {
-	row_source.RegisterRowSource[*ActivityLogAPISource]()
-}
 
 type ActivityLogAPISource struct {
 	row_source.RowSourceImpl[*ActivityLogAPISourceConfig, *config.AzureConnection]

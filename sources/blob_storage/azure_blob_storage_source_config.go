@@ -1,4 +1,4 @@
-package sources
+package blob_storage
 
 import (
 	"fmt"
