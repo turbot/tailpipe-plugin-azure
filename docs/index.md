@@ -21,8 +21,8 @@ The [Azure Plugin for Tailpipe](https://hub.tailpipe.io/plugins/turbot/azure) al
 - Community: [Join #tailpipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/tailpipe-plugin-azure/issues)
 
-<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_cloudtrail_log_terminal.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_cloudtrail_log_mitre_dashboard.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_terminal.png" width="50%" type="thumbnail"/>
+<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_mitre_dashboard.png" width="50%" type="thumbnail"/>
 
 ## Getting Started
 
@@ -44,21 +44,25 @@ Install the plugin:
 tailpipe plugin install azure
 ```
 
-Configure your [connection credentials](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials), table partition, and data source ([examples](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_cloudtrail_log#example-configurations)):
+Configure your [connection credentials](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials), table partition, and data source ([examples](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_activity_log#example-configurations)):
 
 ```sh
 vi ~/.tailpipe/config/azure.tpc
 ```
 
 ```hcl
-connection "azure" "logging_account" {
-  profile = "my-logging-account"
+connection "azure" "azure_auth" {
+  tenant_id       = "my_tenant_id"
+  subscription_id = "my_subscription_id"
+  client_id       = "my_client_id"
+  client_secret   = "my_client_secret"  
 }
 
-partition "azure_cloudtrail_log" "my_logs" {
-  source "azure_s3_bucket" {
-    connection = connection.azure.logging_account
-    bucket     = "azure-cloudtrail-logs-bucket"
+partition "azure_activity_log" "azure_auth" {
+  source "azure_blob_storage" {
+    connection   = connection.azure.cli_auth
+    account_name = "storage_account_name"
+    container    = "container_name"
   }
 }
 ```
@@ -66,7 +70,7 @@ partition "azure_cloudtrail_log" "my_logs" {
 Download, enrich, and save logs from your source ([examples](https://tailpipe.io/docs/reference/cli/collect)):
 
 ```sh
-tailpipe collect azure_cloudtrail_log
+tailpipe collect azure_activity_log
 ```
 
 Enter interactive query mode:
@@ -79,42 +83,44 @@ Run a query:
 
 ```sql
 select
-  event_source,
-  event_name,
-  count(*) as event_count
+  resource_type,
+  operation_name,
+  count(*) as operation_count
 from
   azure_activity_log
 group by
-  event_source,
-  event_name
+  resource_type,
+  operation_name
 order by
-  event_count desc;
+  operation_count desc;
 ```
 
 ```sh
-+------------------------+---------------------------+-------------+
-| event_source           | event_name                | event_count |
-+------------------------+---------------------------+-------------+
-| Microsoft.Storage      | Write                     | 18054       |
-| Microsoft.Compute      | StartVirtualMachine       | 30231       |
-| Microsoft.Compute      | DeallocateVirtualMachine  | 19812       |
-| Microsoft.Network      | CreateSecurityRule        | 50287       |
-| Microsoft.Resources    | DeployTemplate            | 79347       |
-| Microsoft.KeyVault     | SetSecret                 | 18213       |
-+------------------------+---------------------------+-------------+
++-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
+| resource_type                                             | operation_name                                                   | operation_count |
++-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
+| Microsoft.Resources/deployments                           | Microsoft.Resources/deployments/write                            | 86              |
+| Microsoft.Resources/deployments                           | Microsoft.Resources/deployments/validate/action                  | 58              |
+| Microsoft.Compute/virtualMachines                         | Microsoft.Authorization/policies/auditIfNotExists/action         | 54              |
+| Microsoft.Compute/virtualMachines                         | Microsoft.Authorization/policies/audit/action                    | 36              |
+| Microsoft.Sql/servers                                     | Microsoft.Authorization/policies/auditIfNotExists/action         | 25              |
+| Microsoft.Sql/servers/databases                           | Microsoft.Sql/servers/databases/read                             | 20              |
+| MICROSOFT.CDN/profiles                                    | Microsoft.Resourcehealth/healthevent/Activated/action            | 18              |
++-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
+
 ```
 
 ## Detections as Code with Powerpipe
 
-Pre-built dashboards and detections for the Azure plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Azure accounts.
+Pre-built dashboards and detections for the Azure plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Azure subscriptions.
 
-For example, the [Azure CloudTrail Logs Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-cloudtrail-log-detections) scans your CloudTrail logs for anomalies, such as an S3 bucket being made public or a change in your VPC network infrastructure.
+For example, the [Azure Activity Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-activity-log-detections) scans your Activity logs for anomalies, such as a SQL Server firewall rule getting updated or a change in your Virtual Network infrastructure.
 
 Dashboards and detections are [open source](https://github.com/topics/tailpipe-mod), allowing easy customization and collaboration.
 
 To get started, choose a mod from the [Powerpipe Hub](https://hub.powerpipe.io/?engines=tailpipe&q=azure).
 
-<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_cloudtrail_log_mitre_dashboard.png"/>
+<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_mitre_dashboard.png"/>
 
 ## Connection Credentials
 
@@ -136,8 +142,10 @@ You may specify the tenant ID, subscription ID, client ID, and client secret to 
 - `client_id`: Specify the app client ID to use.
 - `client_secret`: Specify the app secret to use.
 
+#### azure.tpc:
+
 ```hcl
-connection "azure_via_sp_secret" {
+connection "azure" "azure_via_sp_secret" {
   plugin            = "azure"
   tenant_id         = "00000000-0000-0000-0000-000000000000"
   subscription_id   = "00000000-0000-0000-0000-000000000000"
@@ -156,8 +164,10 @@ You may specify the tenant ID, subscription ID, client ID, certificate path, and
 - `certificate_path`: Specify the certificate path to use.
 - `certificate_password`: Specify the certificate password to use.
 
+#### azure.tpc:
+
 ```hcl
-connection "azure_via_sp_cert" {
+connection "azure" "azure_via_sp_cert" {
   plugin               = "azure"
   tenant_id            = "00000000-0000-0000-0000-000000000000"
   subscription_id      = "00000000-0000-0000-0000-000000000000"
@@ -179,8 +189,10 @@ You may specify the tenant ID, subscription ID, client ID, username, and passwor
 - `username`: Specify the username to use.
 - `password`: Specify the password to use.
 
+#### azure.tpc:
+
 ```hcl
-connection "password_not_recommended" {
+connection "azure" "password_not_recommended" {
   plugin          = "azure"
   tenant_id       = "00000000-0000-0000-0000-000000000000"
   subscription_id = "00000000-0000-0000-0000-000000000000"
@@ -198,8 +210,10 @@ Steampipe works with managed identities (formerly known as Managed Service Ident
 - `subscription_id`: Specify the subscription to query.
 - `client_id`: Specify the app client ID of managed identity to use.
 
+#### azure.tpc:
+
 ```hcl
-connection "azure_msi" {
+connection "azure" "azure_msi" {
   plugin          = "azure"
   tenant_id       = "00000000-0000-0000-0000-000000000000"
   client_id       = "00000000-0000-0000-0000-000000000000"
@@ -213,10 +227,10 @@ If no credentials are specified and the SDK environment variables are not set, t
 
 - `subscription_id`: Specifies the subscription to connect to. If not set, use the subscription ID set in the Azure CLI (`az account show`)
 
+#### azure.tpc:
+
 ```hcl
-connection "azure" {
-  plugin = "azure"
-}
+connection "azure" "cli_auth" {}
 ```
 
 ### Credentials from Environment Variables
@@ -231,10 +245,4 @@ export AZURE_CLIENT_ID="00000000-0000-0000-0000-000000000000"
 export AZURE_CLIENT_SECRET="my plaintext secret"
 export AZURE_CERTIFICATE_PATH="path/to/file.pem"
 export AZURE_CERTIFICATE_PASSWORD="my plaintext password"
-```
-
-```hcl
-connection "azure" {
-  plugin = "azure"
-}
 ```

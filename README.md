@@ -73,36 +73,38 @@ Run a query:
 
 ```sql
 select
-  event_source,
-  event_name,
-  count(*) as event_count
+  resource_type,
+  operation_name,
+  count(*) as operation_count
 from
   azure_activity_log
 group by
-  event_source,
-  event_name
+  resource_type,
+  operation_name
 order by
-  event_count desc;
+  operation_count desc;
 ```
 
 ```sh
-+------------------------+---------------------------+-------------+
-| event_source           | event_name                | event_count |
-+------------------------+---------------------------+-------------+
-| Microsoft.Storage      | Write                     | 780542      |
-| Microsoft.Compute      | StartVirtualMachine       | 402312      |
-| Microsoft.Compute      | DeallocateVirtualMachine  | 298123      |
-| Microsoft.Network      | CreateSecurityRule        | 102874      |
-| Microsoft.Resources    | DeployTemplate            | 89347       |
-| Microsoft.KeyVault     | SetSecret                 | 48213       |
-+------------------------+---------------------------+-------------+
++-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
+| resource_type                                             | operation_name                                                   | operation_count |
++-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
+| Microsoft.Resources/deployments                           | Microsoft.Resources/deployments/write                            | 86              |
+| Microsoft.Resources/deployments                           | Microsoft.Resources/deployments/validate/action                  | 58              |
+| Microsoft.Compute/virtualMachines                         | Microsoft.Authorization/policies/auditIfNotExists/action         | 54              |
+| Microsoft.Compute/virtualMachines                         | Microsoft.Authorization/policies/audit/action                    | 36              |
+| Microsoft.Sql/servers                                     | Microsoft.Authorization/policies/auditIfNotExists/action         | 25              |
+| Microsoft.Sql/servers/databases                           | Microsoft.Sql/servers/databases/read                             | 20              |
+| MICROSOFT.CDN/profiles                                    | Microsoft.Resourcehealth/healthevent/Activated/action            | 18              |
++-----------------------------------------------------------+------------------------------------------------------------------+-----------------+
+
 ```
 
 ## Detections as Code with Powerpipe
 
-Pre-built dashboards and detections for the Azure plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Azure accounts.
+Pre-built dashboards and detections for the Azure plugin are available in [Powerpipe](https://powerpipe.io) mods, helping you monitor and analyze activity across your Azure subscriptions.
 
-For example, the [Azure CloudTrail Logs Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-cloudtrail-log-detections) scans your CloudTrail logs for anomalies, such as an S3 bucket being made public or a change in your VPC network infrastructure.
+For example, the [Azure Activity Log Detections mod](https://hub.powerpipe.io/mods/turbot/tailpipe-mod-azure-activity-log-detections) scans your Activity logs for anomalies, such as a SQL Server firewall rule getting updated or a change in your Virtual Network infrastructure.
 
 Dashboards and detections are [open source](https://github.com/topics/tailpipe-mod), allowing easy customization and collaboration.
 
