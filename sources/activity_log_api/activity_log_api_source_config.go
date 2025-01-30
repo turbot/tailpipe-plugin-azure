@@ -1,4 +1,4 @@
-package sources
+package activity_log_api
 
 type ActivityLogAPISourceConfig struct {
 }

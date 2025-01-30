@@ -1,4 +1,4 @@
-package mappers
+package activity_log
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 
-	"github.com/turbot/tailpipe-plugin-azure/rows"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
@@ -18,13 +17,13 @@ func (m *ActivityLogMapper) Identifier() string {
 	return "azure_activity_log_mapper"
 }
 
-func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*rows.ActivityLog]) (*rows.ActivityLog, error) {
+func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*ActivityLog]) (*ActivityLog, error) {
 
-	var row rows.ActivityLog
+	var row ActivityLog
 
 	switch v := a.(type) {
 	case string: // Activity log storage account artifact source
-		var storageAccLog rows.AzureStorageAccountLog
+		var storageAccLog AzureStorageAccountLog
 		err := json.Unmarshal([]byte(v), &storageAccLog)
 		if err != nil {
 			return nil, err
@@ -47,7 +46,7 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*
 			}
 		}
 
-		activityLog := &rows.ActivityLog{
+		activityLog := &ActivityLog{
 			Caller:               claims["name"],
 			Category:             storageAccLog.Category,
 			Claims:               &claims,
@@ -70,13 +69,13 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*
 			SubmissionTimestamp:  storageAccLog.Time,
 			SubscriptionID:       extractSubscriptionID(*storageAccLog.ResourceID), // Extract from ResourceID
 			TenantID:             storageAccLog.TenantID,
-			HttpRequest: &rows.ActivityLogHttpRequest{
+			HttpRequest: &ActivityLogHttpRequest{
 				ClientIpAddress: storageAccLog.CallerIPAddress,
 			},
 		}
 
 		if storageAccLog.Identity != nil {
-			activityLog.AuthorizationInfo = &rows.ActivityLogAuthorization{
+			activityLog.AuthorizationInfo = &ActivityLogAuthorization{
 				Action: storageAccLog.Identity.Authorization.Action,
 				Scope:  storageAccLog.Identity.Authorization.Scope,
 				Role:   storageAccLog.Identity.Authorization.Evidence.Role,
@@ -91,7 +90,7 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*
 			return nil, fmt.Errorf("invalid row type: %T, expected *armmonitor.EventData", a)
 		}
 		if logEntry.Authorization != nil {
-			row.AuthorizationInfo = &rows.ActivityLogAuthorization{
+			row.AuthorizationInfo = &ActivityLogAuthorization{
 				Action: logEntry.Authorization.Action,
 				Scope:  logEntry.Authorization.Scope,
 				Role:   logEntry.Authorization.Role,
@@ -99,7 +98,7 @@ func (m *ActivityLogMapper) Map(_ context.Context, a any, _ ...table.MapOption[*
 		}
 
 		if logEntry.HTTPRequest != nil {
-			row.HttpRequest = &rows.ActivityLogHttpRequest{
+			row.HttpRequest = &ActivityLogHttpRequest{
 				ClientIpAddress: logEntry.HTTPRequest.ClientIPAddress,
 				ClientRequestId: logEntry.HTTPRequest.ClientRequestID,
 				Method:          logEntry.HTTPRequest.Method,

@@ -1,4 +1,4 @@
-package tables
+package activity_log
 
 import (
 	"strings"
@@ -7,9 +7,8 @@ import (
 	"github.com/rs/xid"
 
 	"github.com/turbot/pipe-fittings/v2/utils"
-	"github.com/turbot/tailpipe-plugin-azure/mappers"
-	"github.com/turbot/tailpipe-plugin-azure/rows"
-	"github.com/turbot/tailpipe-plugin-azure/sources"
+	"github.com/turbot/tailpipe-plugin-azure/sources/activity_log_api"
+	"github.com/turbot/tailpipe-plugin-azure/sources/blob_storage"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source"
 	"github.com/turbot/tailpipe-plugin-sdk/artifact_source_config"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
@@ -19,15 +18,6 @@ import (
 
 const ActivityLogTableIdentifier = "azure_activity_log"
 
-// register the table from the package init function
-func init() {
-	// Register the table, with type parameters:
-	// 1. row struct
-	// 2. table config struct
-	// 3. table implementation
-	table.RegisterTable[*rows.ActivityLog, *ActivityLogTable]()
-}
-
 type ActivityLogTable struct {
 }
 
@@ -35,20 +25,20 @@ func (c *ActivityLogTable) Identifier() string {
 	return ActivityLogTableIdentifier
 }
 
-func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.ActivityLog] {
+func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*ActivityLog] {
 
 	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigImpl{
 		FileLayout: utils.ToStringPointer("/SUBSCRIPTIONS/%{DATA:subscription_id}/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json"),
 	}
 
-	return []*table.SourceMetadata[*rows.ActivityLog]{
+	return []*table.SourceMetadata[*ActivityLog]{
 		{
-			SourceName: sources.ActivityLogAPISourceIdentifier,
-			Mapper:     &mappers.ActivityLogMapper{},
+			SourceName: activity_log_api.ActivityLogAPISourceIdentifier,
+			Mapper:     &ActivityLogMapper{},
 		},
 		{
-			SourceName: sources.AzureBlobStorageSourceIdentifier,
-			Mapper:     &mappers.ActivityLogMapper{},
+			SourceName: blob_storage.AzureBlobStorageSourceIdentifier,
+			Mapper:     &ActivityLogMapper{},
 			Options: []row_source.RowSourceOption{
 				artifact_source.WithDefaultArtifactSourceConfig(defaultArtifactConfig),
 				artifact_source.WithRowPerLine(),
@@ -57,7 +47,7 @@ func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*rows.Act
 	}
 }
 
-func (c *ActivityLogTable) EnrichRow(row *rows.ActivityLog, sourceEnrichmentFields schema.SourceEnrichment) (*rows.ActivityLog, error) {
+func (c *ActivityLogTable) EnrichRow(row *ActivityLog, sourceEnrichmentFields schema.SourceEnrichment) (*ActivityLog, error) {
 	row.CommonFields = sourceEnrichmentFields.CommonFields
 
 	// Record Standardization
