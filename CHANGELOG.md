@@ -1,3 +1,9 @@
+## v0.2.0 [2025-02-06]
+
+_Enhancements_
+
+- Updated documentation formatting and enhanced argument descriptions for `azure_activity_log_api` and `azure_blob_storage` sources. ([#34](https://github.com/turbot/tailpipe-plugin-azure/pull/34))
+
 ## v0.1.0 [2025-01-30]
 
 _What's new?_
