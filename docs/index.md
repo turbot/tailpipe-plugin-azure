@@ -21,8 +21,8 @@ The [Azure Plugin for Tailpipe](https://hub.tailpipe.io/plugins/turbot/azure) al
 - Community: [Join #tailpipe on Slack →](https://turbot.com/community/join)
 - Get involved: [Issues](https://github.com/turbot/tailpipe-plugin-azure/issues)
 
-<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_terminal.png" width="50%" type="thumbnail"/>
-<img src="https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_mitre_dashboard.png" width="50%" type="thumbnail"/>
+![Image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_terminal.png?type=thumbnail)  
+![Image](https://raw.githubusercontent.com/turbot/tailpipe-plugin-azure/main/docs/images/azure_activity_log_mitre_dashboard.png?type=thumbnail)
 
 ## Getting Started
 
