@@ -49,13 +49,12 @@ partition "azure_activity_log" "my_logs_subscription" {
 
 ## Arguments
 
-| Argument     | Type        | Required | Default                    | Description                                                                                                              |
-|--------------|------------|----------|----------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| account_name | String     | Yes      |                            | The name of the Storage account to collect logs from.                                                                   |
-| connection   | Connection | No       | connection.azure.default   | The [Azure connection](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials) to use to connect to the Azure subscription. |
-| container    | String     | Yes      |                            | The name of the Storage container where logs are stored.                                                                |
-| file_layout  | String     | No       |                            | The Grok pattern that defines the log file structure.                                                                   |
-
+| Argument     | Type               | Required | Default                    | Description                                                                                                              |
+|--------------|--------------------|----------|----------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| account_name | String             | Yes      |                            | The name of the Storage account to collect logs from.                                                                   |
+| connection   | `connection.azure` | No       | `connection.azure.default` | The [Azure connection](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials) to use to connect to the Azure subscription. |
+| container    | String             | Yes      |                            | The name of the Storage container where logs are stored.                                                                |
+| file_layout  | String             | No       |                            | The Grok pattern that defines the log file structure.                                                                   |
 
 ### Table Defaults
 

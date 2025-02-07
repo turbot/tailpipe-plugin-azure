@@ -32,7 +32,6 @@ partition "azure_activity_log" "my_logs" {
 
 ## Arguments
 
-| Argument   | Type        | Required | Default                    | Description                                                                                                                 |
-|------------|------------|----------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| connection | Connection | No       | connection.azure.default   | The [Azure connection](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials) to use to connect to the Azure subscription. |
-
+| Argument   | Type               | Required | Default                    | Description                                                                                                                 |
+|------------|--------------------|----------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| connection | `connection.azure` | No       | `connection.azure.default` | The [Azure connection](https://hub.tailpipe.io/plugins/turbot/azure#connection-credentials) to use to connect to the Azure subscription. |
