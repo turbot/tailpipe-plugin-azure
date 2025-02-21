@@ -13,7 +13,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.1.0
 	github.com/turbot/pipe-fittings/v2 v2.1.1
-	github.com/turbot/tailpipe-plugin-sdk v0.1.0
+	github.com/turbot/tailpipe-plugin-sdk v0.1.1
 )
 
 require (
