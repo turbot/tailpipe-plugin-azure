@@ -17,7 +17,7 @@ order by
 ```
 
 ```yaml
-folder: Account
+folder: Subscription
 ```
 
 ### Top 10 Events
@@ -40,7 +40,7 @@ limit 10;
 ```
 
 ```yaml
-folder: Account
+folder: Subscription
 ```
 
 ### Top 10 Failed Events
@@ -65,7 +65,7 @@ limit 10;
 ```
 
 ```yaml
-folder: Account
+folder: Subscription
 ```
 
 ### Top Events by Subscription
@@ -89,7 +89,7 @@ order by
 ```
 
 ```yaml
-folder: Account
+folder: Subscription
 ```
 
 ### Top Error Codes
@@ -111,7 +111,7 @@ order by
 ```
 
 ```yaml
-folder: Account
+folder: Subscription
 ```
 
 ## Detection Examples
@@ -136,7 +136,7 @@ order by
 ```
 
 ```yaml
-folder: Account
+folder: Subscription
 ```
 
 ## Operational Examples
@@ -161,7 +161,7 @@ order by
 ```
 
 ```yaml
-folder: Account
+folder: IAM
 ```
 
 ## Volume Examples
