@@ -20,29 +20,6 @@ order by
 folder: Subscription
 ```
 
-### Top 10 Events
-
-List the 10 most frequently called events.
-
-```sql
-select
-  resource_provider_name,
-  operation_name,
-  count(*) as event_count
-from
-  azure_activity_log
-group by
-  resource_provider_name,
-  operation_name
-order by
-  event_count desc
-limit 10;
-```
-
-```yaml
-folder: Subscription
-```
-
 ### Top 10 Failed Events
 
 List the top 10 most frequently called events that failed.
