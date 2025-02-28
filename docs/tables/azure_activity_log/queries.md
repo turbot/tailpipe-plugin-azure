@@ -1,6 +1,6 @@
 ## Activity Examples
 
-### Daily activity trends
+### Daily Activity Trends
 
 Count events per day to identify activity trends over time.
 
@@ -16,7 +16,7 @@ order by
   event_date asc;
 ```
 
-### Top 10 events
+### Top 10 Events
 
 List the 10 most frequently called events.
 
@@ -35,7 +35,7 @@ order by
 limit 10;
 ```
 
-### Top 10 failed events
+### Top 10 Failed Events
 
 List the top 10 most frequently called events that failed.
 
@@ -56,7 +56,7 @@ order by
 limit 10;
 ```
 
-### Top events by subscription
+### Top Events by Subscription
 
 Count and group events by subscription ID, event source, and event name to analyze activity across subscriptions.
 
@@ -76,7 +76,7 @@ order by
   event_count desc;
 ```
 
-### Top error codes
+### Top Error Codes
 
 Identify the most frequent error codes.
 
@@ -96,7 +96,7 @@ order by
 
 ## Detection Examples
 
-### Activity from unapproved IP addresses
+### Activity from Unapproved IP Addresses
 
 Flag activity originating from IP addresses outside an approved list.
 
@@ -117,7 +117,7 @@ order by
 
 ## Operational Examples
 
-### Azure role assignments
+### Azure Role Assignments
 
 List role assignments to check for unexpected or suspicious role changes.
 
@@ -138,7 +138,7 @@ order by
 
 ## Volume Examples
 
-### High volume of storage account access requests
+### High Volume of Storage Account Access Requests
 
 Detect unusually high access activity to storage accounts.
 
