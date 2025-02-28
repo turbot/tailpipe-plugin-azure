@@ -1,6 +1,6 @@
 ## Activity Examples
 
-### Daily activity trends
+### Daily Activity Trends
 
 Count events per day to identify activity trends over time.
 
@@ -16,26 +16,11 @@ order by
   event_date asc;
 ```
 
-### Top 10 events
-
-List the 10 most frequently called events.
-
-```sql
-select
-  resource_provider_name,
-  operation_name,
-  count(*) as event_count
-from
-  azure_activity_log
-group by
-  resource_provider_name,
-  operation_name
-order by
-  event_count desc
-limit 10;
+```yaml
+folder: Subscription
 ```
 
-### Top 10 failed events
+### Top 10 Failed Events
 
 List the top 10 most frequently called events that failed.
 
@@ -56,7 +41,11 @@ order by
 limit 10;
 ```
 
-### Top events by subscription
+```yaml
+folder: Subscription
+```
+
+### Top Events by Subscription
 
 Count and group events by subscription ID, event source, and event name to analyze activity across subscriptions.
 
@@ -76,7 +65,11 @@ order by
   event_count desc;
 ```
 
-### Top error codes
+```yaml
+folder: Subscription
+```
+
+### Top Error Codes
 
 Identify the most frequent error codes.
 
@@ -94,9 +87,13 @@ order by
   event_count desc;
 ```
 
+```yaml
+folder: Subscription
+```
+
 ## Detection Examples
 
-### Activity from unapproved IP addresses
+### Activity from Unapproved IP Addresses
 
 Flag activity originating from IP addresses outside an approved list.
 
@@ -115,9 +112,13 @@ order by
   event_timestamp desc;
 ```
 
+```yaml
+folder: Subscription
+```
+
 ## Operational Examples
 
-### Azure role assignments
+### Azure Role Assignments
 
 List role assignments to check for unexpected or suspicious role changes.
 
@@ -136,9 +137,13 @@ order by
   event_timestamp desc;
 ```
 
+```yaml
+folder: IAM
+```
+
 ## Volume Examples
 
-### High volume of storage account access requests
+### High Volume of Storage Account Access Requests
 
 Detect unusually high access activity to storage accounts.
 
@@ -158,4 +163,8 @@ having
   count(*) > 100
 order by
   event_count desc;
+```
+
+```yaml
+folder: Storage
 ```
