@@ -16,6 +16,10 @@ order by
   event_date asc;
 ```
 
+```yaml
+folder: Account
+```
+
 ### Top 10 Events
 
 List the 10 most frequently called events.
@@ -33,6 +37,10 @@ group by
 order by
   event_count desc
 limit 10;
+```
+
+```yaml
+folder: Account
 ```
 
 ### Top 10 Failed Events
@@ -56,6 +64,10 @@ order by
 limit 10;
 ```
 
+```yaml
+folder: Account
+```
+
 ### Top Events by Subscription
 
 Count and group events by subscription ID, event source, and event name to analyze activity across subscriptions.
@@ -76,6 +88,10 @@ order by
   event_count desc;
 ```
 
+```yaml
+folder: Account
+```
+
 ### Top Error Codes
 
 Identify the most frequent error codes.
@@ -92,6 +108,10 @@ group by
   sub_status
 order by
   event_count desc;
+```
+
+```yaml
+folder: Account
 ```
 
 ## Detection Examples
@@ -115,6 +135,10 @@ order by
   event_timestamp desc;
 ```
 
+```yaml
+folder: Account
+```
+
 ## Operational Examples
 
 ### Azure Role Assignments
@@ -134,6 +158,10 @@ where
   operation_name = 'Microsoft.Authorization/roleAssignments/write'
 order by
   event_timestamp desc;
+```
+
+```yaml
+folder: Account
 ```
 
 ## Volume Examples
@@ -158,4 +186,8 @@ having
   count(*) > 100
 order by
   event_count desc;
+```
+
+```yaml
+folder: Storage
 ```
