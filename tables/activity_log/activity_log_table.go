@@ -25,7 +25,7 @@ func (c *ActivityLogTable) Identifier() string {
 	return ActivityLogTableIdentifier
 }
 
-func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*ActivityLog] {
+func (c *ActivityLogTable) GetSourceMetadata() ([]*table.SourceMetadata[*ActivityLog], error) {
 
 	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigImpl{
 		FileLayout: utils.ToStringPointer("/SUBSCRIPTIONS/%{DATA:subscription_id}/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json"),
@@ -44,7 +44,7 @@ func (c *ActivityLogTable) GetSourceMetadata() []*table.SourceMetadata[*Activity
 				artifact_source.WithRowPerLine(),
 			},
 		},
-	}
+	}, nil
 }
 
 func (c *ActivityLogTable) EnrichRow(row *ActivityLog, sourceEnrichmentFields schema.SourceEnrichment) (*ActivityLog, error) {
