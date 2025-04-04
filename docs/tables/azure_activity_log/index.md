@@ -177,7 +177,7 @@ partition "azure_activity_log" "my_logs_subscription" {
     connection   = connection.azure.my_logging_account
     account_name = "storage_account_name"
     container    = "container_name"
-    file_layout  = "/SUBSCRIPTIONS/12345678-1234-1234-1234-123456789012/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json"
+    file_layout  = `/SUBSCRIPTIONS/12345678-1234-1234-1234-123456789012/y=%{YEAR:year}/m=%{MONTHNUM:month}/d=%{MONTHDAY:day}/h=%{HOUR:hour}/m=%{MINUTE:minute}/%{DATA:filename}.json`
   }
 }
 ```
