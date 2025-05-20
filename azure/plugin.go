@@ -6,6 +6,7 @@ import (
 	"github.com/turbot/tailpipe-plugin-azure/sources/activity_log_api"
 	"github.com/turbot/tailpipe-plugin-azure/sources/blob_storage"
 	"github.com/turbot/tailpipe-plugin-azure/tables/activity_log"
+	"github.com/turbot/tailpipe-plugin-azure/tables/cost_management"
 	"github.com/turbot/tailpipe-plugin-sdk/plugin"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
 	"github.com/turbot/tailpipe-plugin-sdk/table"
@@ -20,6 +21,7 @@ func init() {
 	// 1. row struct
 	// 2. table implementation
 	table.RegisterTable[*activity_log.ActivityLog, *activity_log.ActivityLogTable]()
+	table.RegisterTable[*cost_management.CostManagement, *cost_management.CostManagementTable]()
 
 	// register sources
 	row_source.RegisterRowSource[*activity_log_api.ActivityLogAPISource]()
