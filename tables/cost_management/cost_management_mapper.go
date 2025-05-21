@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
+	"encoding/json"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -208,24 +209,19 @@ func (m *CostManagementMapper) Map(_ context.Context, a any, opts ...mappers.Map
 		case "additionalinfo":
 			output.AdditionalInfo = &value
 		case "tags":
-			// Parse tags string into map
-			tags := make(map[string]interface{})
-			tagPairs := strings.Split(value, ";")
-			for _, pair := range tagPairs {
-				if pair == "" {
-					continue
+			// Parse tags JSON string into map
+			if value != "" {
+				tags := make(map[string]interface{})
+				err := json.Unmarshal([]byte(value), &tags)
+				if err == nil && len(tags) > 0 {
+					output.Tags = &tags
+				} else if err != nil {
+					slog.Error("CostManagementMapper.Map failed to parse tags JSON", "error", err, "value", value)
 				}
-				kv := strings.SplitN(pair, ":", 2)
-				if len(kv) == 2 {
-					tags[kv[0]] = kv[1]
-				}
-			}
-			if len(tags) > 0 {
-				output.Tags = &tags
 			}
 		case "paygprice":
 			if f, err := strconv.ParseFloat(value, 64); err == nil {
-				output.PayGPrice = &f
+				output.PaygPrice = &f
 			}
 		case "frequency":
 			output.Frequency = &value

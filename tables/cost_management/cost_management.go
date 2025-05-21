@@ -64,7 +64,7 @@ type CostManagement struct {
 	ServiceInfo2                 *string                 `json:"service_info2,omitempty" parquet:"name=service_info2"`
 	AdditionalInfo               *string                 `json:"additional_info,omitempty" parquet:"name=additional_info"`
 	Tags                         *map[string]interface{} `json:"tags,omitempty" parquet:"name=tags, type=JSON"`
-	PayGPrice                    *float64                `json:"pay_g_price,omitempty" parquet:"name=pay_g_price"`
+	PaygPrice                    *float64                `json:"payg_price,omitempty" parquet:"name=payg_price"`
 	Frequency                    *string                 `json:"frequency,omitempty" parquet:"name=frequency"`
 	Term                         *string                 `json:"term,omitempty" parquet:"name=term"`
 	ReservationId                *string                 `json:"reservation_id,omitempty" parquet:"name=reservation_id"`
@@ -139,7 +139,7 @@ func (c *CostManagement) GetColumnDescriptions() map[string]string {
 		"service_info2":                    "Additional service information field 2.",
 		"additional_info":                  "Additional information about the charge.",
 		"tags":                             "Resource tags associated with the resource.",
-		"pay_g_price":                      "The pay-as-you-go price per unit.",
+		"payg_price":                       "The pay-as-you-go price per unit.",
 		"frequency":                        "The frequency of the charge (e.g., monthly, one-time).",
 		"term":                             "The term of the commitment (e.g., 1 year, 3 years).",
 		"reservation_id":                   "The identifier for the reservation, if applicable.",
