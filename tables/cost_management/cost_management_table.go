@@ -27,10 +27,7 @@ func (t *CostManagementTable) Identifier() string {
 func (t *CostManagementTable) GetSourceMetadata() ([]*table.SourceMetadata[*CostManagement], error) {
 	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigImpl{
 		// Grok pattern to match Azure Cost Management export files
-		// Pattern matches files like:
-		// - part_0_0001.csv.gz
-		// - part_1_0001.csv.gz
-		// This pattern can be adjusted based on the actual file naming convention
+		// Pattern matches files like:  part_0_0001.csv.gz / part_1_0001.csv / part_2_0001.csv.zip
 		FileLayout: utils.ToStringPointer("part_%{INT:part_number}_%{INT:file_number}.csv.(?:gz|zip)"),
 	}
 
@@ -57,24 +54,10 @@ func (t *CostManagementTable) EnrichRow(row *CostManagement, sourceEnrichmentFie
 	row.TpID = xid.New().String()
 	row.TpIngestTimestamp = time.Now()
 
-	// Set TpTimestamp based on available date fields
-	if row.Date != nil {
-		row.TpTimestamp = *row.Date
-		row.TpDate = row.Date.Truncate(24 * time.Hour)
-	} else if row.ServicePeriodStartDate != nil {
-		row.TpTimestamp = *row.ServicePeriodStartDate
-		row.TpDate = row.ServicePeriodStartDate.Truncate(24 * time.Hour)
-	} else if row.ServicePeriodEndDate != nil {
-		row.TpTimestamp = *row.ServicePeriodEndDate
-		row.TpDate = row.ServicePeriodEndDate.Truncate(24 * time.Hour)
-	} else if row.BillingPeriodStartDate != nil {
-		row.TpTimestamp = *row.BillingPeriodStartDate
-		row.TpDate = row.BillingPeriodStartDate.Truncate(24 * time.Hour)
-	} else if row.BillingPeriodEndDate != nil {
-		row.TpTimestamp = *row.BillingPeriodEndDate
-		row.TpDate = row.BillingPeriodEndDate.Truncate(24 * time.Hour)
-	}
+	// Set TpTimestamp and TpDate based on available date fields using priority-based function
+	setTimestampByPriority(row)
 
+	// Set TpIndex to default index
 	row.TpIndex = schema.DefaultIndex
 
 	// Set TpAkas to resource ID if available
@@ -87,4 +70,25 @@ func (t *CostManagementTable) EnrichRow(row *CostManagement, sourceEnrichmentFie
 
 func (t *CostManagementTable) GetDescription() string {
 	return "Azure Cost Management data provides detailed information about Azure resource usage and costs, including subscription charges, resource consumption, pricing details, and billing information. This table enables cost analysis, budget tracking, and optimization insights across Azure subscriptions."
+}
+
+// setTimestampByPriority sets the timestamp based on priority order of available date fields
+func setTimestampByPriority(row *CostManagement) {
+	// Priority order: Date > ServicePeriodStartDate > ServicePeriodEndDate > BillingPeriodStartDate > BillingPeriodEndDate
+	dateFields := []*time.Time{
+		row.Date,
+		row.ServicePeriodStartDate,
+		row.ServicePeriodEndDate,
+		row.BillingPeriodStartDate,
+		row.BillingPeriodEndDate,
+	}
+
+	for _, dateField := range dateFields {
+		if dateField != nil {
+			truncatedDate := dateField.Truncate(24 * time.Hour)
+			row.TpTimestamp = *dateField
+			row.TpDate = truncatedDate
+			return
+		}
+	}
 }
