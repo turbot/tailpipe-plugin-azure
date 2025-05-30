@@ -60,7 +60,7 @@ func (m *CostManagementMapper) Map(_ context.Context, a any, opts ...mappers.Map
 	// validate header/value count
 	if len(record) != len(m.headers) {
 		slog.Error("CostManagementMapper.Map failed to map row due to header/value count mismatch", "expected", len(m.headers), "got", len(record))
-		return nil, error_types.NewRowErrorWithMessage("row fields doesn't match count of headers")
+		return nil, error_types.NewRowErrorWithMessage("row field count does not match header count")
 	}
 
 	// create a new CostManagement object with initialized maps
