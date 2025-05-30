@@ -17,7 +17,7 @@ order by
 ```
 
 ```yaml
-folder: Cost Analysis
+folder: Cost Management
 ```
 
 ### Daily Cost Breakdown
@@ -38,7 +38,7 @@ limit 30;
 ```
 
 ```yaml
-folder: Cost Analysis
+folder: Cost Management
 ```
 
 ### Top 10 Services by Cost
@@ -60,7 +60,7 @@ limit 10;
 ```
 
 ```yaml
-folder: Cost Analysis
+folder: Cost Management
 ```
 
 ### Cost by Meter Category
@@ -83,7 +83,7 @@ order by
 ```
 
 ```yaml
-folder: Cost Analysis
+folder: Cost Management
 ```
 
 ## Resource Examples
@@ -112,7 +112,7 @@ limit 10;
 ```
 
 ```yaml
-folder: Resources
+folder: Cost Management
 ```
 
 ### Cost by Resource Group
@@ -135,7 +135,7 @@ order by
 ```
 
 ```yaml
-folder: Resources
+folder: Cost Management
 ```
 
 ### Cost by Resource Location
@@ -158,7 +158,7 @@ order by
 ```
 
 ```yaml
-folder: Resources
+folder: Cost Management
 ```
 
 ## Subscription Examples
@@ -182,7 +182,7 @@ order by
 ```
 
 ```yaml
-folder: Subscriptions
+folder: Cost Management
 ```
 
 ### Monthly Costs by Subscription
@@ -205,7 +205,7 @@ order by
 ```
 
 ```yaml
-folder: Subscription
+folder: Cost Management
 ```
 
 ## Optimization Examples
@@ -235,7 +235,7 @@ order by
 ```
 
 ```yaml
-folder: Optimization
+folder: Cost Management
 ```
 
 ### Cost by Pricing Model
@@ -258,7 +258,7 @@ order by
 ```
 
 ```yaml
-folder: Optimization
+folder: Cost Management
 ```
 
 ### Reservation Usage Analysis
@@ -283,7 +283,7 @@ order by
 ```
 
 ```yaml
-folder: Optimization
+folder: Cost Management
 ```
 
 ### Pay-As-You-Go vs. Effective Price Comparison
@@ -308,5 +308,5 @@ order by
 ```
 
 ```yaml
-folder: Optimization
+folder: Cost Management
 ```
