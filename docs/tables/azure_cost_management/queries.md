@@ -205,7 +205,7 @@ order by
 ```
 
 ```yaml
-folder: Subscriptions
+folder: Subscription
 ```
 
 ## Optimization Examples
