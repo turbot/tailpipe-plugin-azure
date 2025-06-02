@@ -1,4 +1,4 @@
-package cost_management
+package cost_and_usage_details
 
 import (
 	"time"
@@ -14,28 +14,28 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/table"
 )
 
-const CostManagementTableIdentifier = "azure_cost_management"
+const CostAndUsageDetailsTableIdentifier = "azure_cost_and_usage_details"
 
-// CostManagementTable - table for Azure Cost Management data
-type CostManagementTable struct{}
+// CostAndUsageDetailsTable - table for Azure Cost and Usage Details data
+type CostAndUsageDetailsTable struct{}
 
 // Identifier implements table.Table
-func (t *CostManagementTable) Identifier() string {
-	return CostManagementTableIdentifier
+func (t *CostAndUsageDetailsTable) Identifier() string {
+	return CostAndUsageDetailsTableIdentifier
 }
 
-func (t *CostManagementTable) GetSourceMetadata() ([]*table.SourceMetadata[*CostManagement], error) {
+func (t *CostAndUsageDetailsTable) GetSourceMetadata() ([]*table.SourceMetadata[*CostAndUsageDetails], error) {
 	defaultArtifactConfig := &artifact_source_config.ArtifactSourceConfigImpl{
 		// Grok pattern to match Azure Cost Management export files
 		// Pattern matches files like:  part_0_0001.csv.gz / part_1_0001.csv / part_2_0001.csv.zip
 		FileLayout: utils.ToStringPointer("part_%{INT:part_number}_%{INT:file_number}.csv.(?:gz|zip)"),
 	}
 
-	return []*table.SourceMetadata[*CostManagement]{
+	return []*table.SourceMetadata[*CostAndUsageDetails]{
 		{
 			// any artifact source
 			SourceName: constants.ArtifactSourceIdentifier,
-			Mapper:     NewCostManagementMapper(),
+			Mapper:     NewCostAndUsageDetailsMapper(),
 			Options: []row_source.RowSourceOption{
 				artifact_source.WithDefaultArtifactSourceConfig(defaultArtifactConfig),
 				artifact_source.WithRowPerLine(),
@@ -46,7 +46,7 @@ func (t *CostManagementTable) GetSourceMetadata() ([]*table.SourceMetadata[*Cost
 }
 
 // EnrichRow implements table.Table
-func (t *CostManagementTable) EnrichRow(row *CostManagement, sourceEnrichmentFields schema.SourceEnrichment) (*CostManagement, error) {
+func (t *CostAndUsageDetailsTable) EnrichRow(row *CostAndUsageDetails, sourceEnrichmentFields schema.SourceEnrichment) (*CostAndUsageDetails, error) {
 	// initialize the enrichment fields to any fields provided by the source
 	row.CommonFields = sourceEnrichmentFields.CommonFields
 
@@ -68,12 +68,12 @@ func (t *CostManagementTable) EnrichRow(row *CostManagement, sourceEnrichmentFie
 	return row, nil
 }
 
-func (t *CostManagementTable) GetDescription() string {
-	return "Azure Cost Management data provides detailed information about Azure resource usage and costs, including subscription charges, resource consumption, pricing details, and billing information. This table enables cost analysis, budget tracking, and optimization insights across Azure subscriptions."
+func (t *CostAndUsageDetailsTable) GetDescription() string {
+	return "Azure Cost and Usage data provides detailed information about Azure resource usage and costs, including subscription charges, resource consumption, pricing details, and billing information. This table enables cost analysis, budget tracking, and optimization insights across Azure subscriptions."
 }
 
 // setTimestampByPriority sets the timestamp based on priority order of available date fields
-func setTimestampByPriority(row *CostManagement) {
+func setTimestampByPriority(row *CostAndUsageDetails) {
 	// Priority order: Date > ServicePeriodStartDate > ServicePeriodEndDate > BillingPeriodStartDate > BillingPeriodEndDate
 	dateFields := []*time.Time{
 		row.Date,
