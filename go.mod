@@ -14,8 +14,8 @@ require (
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.3.0
-	github.com/turbot/pipe-fittings/v2 v2.4.2
-	github.com/turbot/tailpipe-plugin-sdk v0.7.0
+	github.com/turbot/pipe-fittings/v2 v2.5.0
+	github.com/turbot/tailpipe-plugin-sdk v0.7.1
 )
 
 require (
