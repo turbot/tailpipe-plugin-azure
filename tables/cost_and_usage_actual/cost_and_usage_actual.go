@@ -1,4 +1,4 @@
-package cost_and_usage_details
+package cost_and_usage_actual
 
 import (
 	"time"
@@ -6,8 +6,8 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/schema"
 )
 
-// CostAndUsageDetails represents the Azure Cost and Usage Details data structure
-type CostAndUsageDetails struct {
+// CostAndUsageActual represents the Azure Cost and Usage Actual data structure
+type CostAndUsageActual struct {
 	schema.CommonFields
 
 	AdditionalInfo               *string                 `json:"additional_info,omitempty" parquet:"name=additional_info"`
@@ -77,13 +77,13 @@ type CostAndUsageDetails struct {
 	UnitPrice                    *float64                `json:"unit_price,omitempty" parquet:"name=unit_price"`
 }
 
-func NewCostAndUsageDetails() *CostAndUsageDetails {
-	return &CostAndUsageDetails{
+func NewCostAndUsageActual() *CostAndUsageActual {
+	return &CostAndUsageActual{
 		Tags: &map[string]interface{}{},
 	}
 }
 
-func (c *CostAndUsageDetails) GetColumnDescriptions() map[string]string {
+func (c *CostAndUsageActual) GetColumnDescriptions() map[string]string {
 	return map[string]string{
 		"additional_info":                  "Additional information about the charge.",
 		"benefit_id":                       "The identifier for the benefit applied.",

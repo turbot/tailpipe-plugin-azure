@@ -1,4 +1,4 @@
-package cost_and_usage_details
+package cost_and_usage_actual
 
 import (
 	"bytes"
@@ -14,23 +14,23 @@ import (
 	"github.com/turbot/tailpipe-plugin-sdk/mappers"
 )
 
-// CostAndUsageDetailsMapper is responsible for mapping CSV rows to CostAndUsageDetails structs
-type CostAndUsageDetailsMapper struct {
+// CostAndUsageActualMapper is responsible for mapping CSV rows to CostAndUsageActual structs
+type CostAndUsageActualMapper struct {
 	headers []string
 }
 
-// NewCostAndUsageDetailsMapper creates a new instance of CostAndUsageDetailsMapper
-func NewCostAndUsageDetailsMapper() *CostAndUsageDetailsMapper {
-	return &CostAndUsageDetailsMapper{}
+// NewCostAndUsageActualMapper creates a new instance of CostAndUsageActualMapper
+func NewCostAndUsageActualMapper() *CostAndUsageActualMapper {
+	return &CostAndUsageActualMapper{}
 }
 
 // Identifier returns a unique identifier for the mapper
-func (m *CostAndUsageDetailsMapper) Identifier() string {
-	return "azure_cost_and_usage_details_mapper"
+func (m *CostAndUsageActualMapper) Identifier() string {
+	return "cost_and_usage_actual_mapper"
 }
 
-// Map converts the input data to a CostAndUsageDetails struct
-func (m *CostAndUsageDetailsMapper) Map(_ context.Context, a any, opts ...mappers.MapOption[*CostAndUsageDetails]) (*CostAndUsageDetails, error) {
+// Map converts the input data to a CostAndUsageActual struct
+func (m *CostAndUsageActualMapper) Map(_ context.Context, a any, opts ...mappers.MapOption[*CostAndUsageActual]) (*CostAndUsageActual, error) {
 	var input []byte
 
 	// apply opts
@@ -45,7 +45,7 @@ func (m *CostAndUsageDetailsMapper) Map(_ context.Context, a any, opts ...mapper
 	case string:
 		input = []byte(v)
 	default:
-		slog.Error("CostAndUsageDetailsMapper.Map failed to map row due to invalid type", "expected", "[]byte or string", "got", v)
+		slog.Error("CostAndUsageActualMapper.Map failed to map row due to invalid type", "expected", "[]byte or string", "got", v)
 		return nil, error_types.NewRowErrorWithMessage("unable to map row, invalid type received")
 	}
 
@@ -53,18 +53,18 @@ func (m *CostAndUsageDetailsMapper) Map(_ context.Context, a any, opts ...mapper
 	reader := csv.NewReader(bytes.NewReader(input))
 	record, err := reader.Read()
 	if err != nil {
-		slog.Error("CostAndUsageDetailsMapper.Map failed to read CSV line", "error", err)
+		slog.Error("CostAndUsageActualMapper.Map failed to read CSV line", "error", err)
 		return nil, error_types.NewRowErrorWithMessage("failed to read log line")
 	}
 
 	// validate header/value count
 	if len(record) != len(m.headers) {
-		slog.Error("CostAndUsageDetailsMapper.Map failed to map row due to header/value count mismatch", "expected", len(m.headers), "got", len(record))
+		slog.Error("CostAndUsageActualMapper.Map failed to map row due to header/value count mismatch", "expected", len(m.headers), "got", len(record))
 		return nil, error_types.NewRowErrorWithMessage("row field count does not match header count")
 	}
 
-	// create a new CostAndUsageDetails object with initialized maps
-	output := NewCostAndUsageDetails()
+	// create a new CostAndUsageActual object with initialized maps
+	output := NewCostAndUsageActual()
 
 	// map to struct (normalize headers)
 	for i, value := range record {
@@ -216,7 +216,7 @@ func (m *CostAndUsageDetailsMapper) Map(_ context.Context, a any, opts ...mapper
 				if err == nil && len(tags) > 0 {
 					output.Tags = &tags
 				} else if err != nil {
-					slog.Error("CostAndUsageDetailsMapper.Map failed to parse tags JSON", "error", err, "value", value)
+					slog.Error("CostAndUsageActualMapper.Map failed to parse tags JSON", "error", err, "value", value)
 				}
 			}
 		case "paygprice":
@@ -252,7 +252,7 @@ func (m *CostAndUsageDetailsMapper) Map(_ context.Context, a any, opts ...mapper
 }
 
 // OnHeader implements the HeaderRowNotifier interface
-func (m *CostAndUsageDetailsMapper) OnHeader(header []string) {
+func (m *CostAndUsageActualMapper) OnHeader(header []string) {
 	newHeaders := make([]string, len(header))
 	// set headers but normalize first
 	for i, h := range header {
