@@ -1,3 +1,10 @@
+## v0.5.0 [2025-06-20]
+
+_What's new?_
+
+- New tables added
+  - [azure_cost_and_usage_actual](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_cost_and_usage_actual) ([#68](https://github.com/turbot/tailpipe-plugin-azure/pull/68))
+
 ## v0.4.2 [2025-06-05]
 
 - Recompiled plugin with [tailpipe-plugin-sdk v0.7.2](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v072-2025-06-04) that fixes an issue where the end time was not correctly recorded for collections using artifact sources. ([#73](https://github.com/turbot/tailpipe-plugin-azure/pull/73))
