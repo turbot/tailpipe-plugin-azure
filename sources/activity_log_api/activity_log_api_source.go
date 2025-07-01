@@ -3,11 +3,9 @@ package activity_log_api
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
-
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
@@ -56,12 +54,13 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 	}
 
 	// set the collection time range
-	toTime := s.CollectionTimeRange.EndTime()
-	fromTime := s.CollectionTimeRange.StartTime()
+	// (note that although we collect backwards, 'from' is still the lower boundary time and 'to' is the upper boundary time,
+	// as we poass them top the filter in the correct order)
+	toTime := s.CollectionTimeRange.UpperBoundary
+	fromTime := s.CollectionTimeRange.LowerBoundary
 	// limit 'from' to 90 days in the past, as per Azure API limits
 	if time.Since(fromTime) > 2160*time.Hour {
-		slog.Warn("the start time is more than 90 days in the past, adjusting to 90 days ago")
-		fromTime = toTime.Add(-2160 * time.Hour) // 90 days in the past
+		return fmt.Errorf("from time %s is more than 90 days in the past, which exceeds Azure API limits", fromTime.Format(time.RFC3339Nano))
 	}
 
 	filter := fmt.Sprintf("eventTimestamp ge '%s' and eventTimestamp le '%s'", fromTime.Format(time.RFC3339Nano), toTime.Format(time.RFC3339Nano))
