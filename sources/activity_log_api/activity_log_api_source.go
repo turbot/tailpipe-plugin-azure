@@ -74,9 +74,9 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 
 		for _, logEntry := range page.Value {
 
-			// check if we've hit previous item - return false if we have, return from function
+			// check if we've hit previous item - continue if we have
 			if !s.CollectionState.ShouldCollect(*logEntry.ID, *logEntry.EventTimestamp) {
-				return nil
+				continue
 			}
 
 			row := &types.RowData{
