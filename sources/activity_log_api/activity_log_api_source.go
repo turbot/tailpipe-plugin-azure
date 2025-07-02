@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
-
 	"github.com/turbot/tailpipe-plugin-azure/config"
 	"github.com/turbot/tailpipe-plugin-sdk/collection_state"
 	"github.com/turbot/tailpipe-plugin-sdk/row_source"
@@ -18,22 +17,20 @@ const ActivityLogAPISourceIdentifier = "azure_activity_log_api"
 
 type ActivityLogAPISource struct {
 	row_source.RowSourceImpl[*ActivityLogAPISourceConfig, *config.AzureConnection]
-
-	// shadow the collection state to use the reverse order collection state
-	CollectionState *collection_state.ReverseOrderCollectionState[*ActivityLogAPISourceConfig]
 }
 
 func (s *ActivityLogAPISource) Init(ctx context.Context, params *row_source.RowSourceParams, opts ...row_source.RowSourceOption) error {
+	// set collection order to reverse
+	s.CollectionOrder = collection_state.CollectionOrderReverse
+
 	// set the collection state ctor
-	s.NewCollectionStateFunc = collection_state.NewReverseOrderCollectionState
+	s.NewCollectionStateFunc = collection_state.NewTimeRangeCollectionState
 
 	// call base init
 	if err := s.RowSourceImpl.Init(ctx, params, opts...); err != nil {
 		return err
 	}
 
-	// type assertion to store correctly typed collection state
-	s.CollectionState = s.RowSourceImpl.CollectionState.(*collection_state.ReverseOrderCollectionState[*ActivityLogAPISourceConfig])
 	return nil
 }
 
@@ -42,8 +39,6 @@ func (s *ActivityLogAPISource) Identifier() string {
 }
 
 func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
-	s.CollectionState.Start()
-	defer s.CollectionState.End()
 
 	client, err := s.getClient(ctx) // client doesn't have a Close() method, nothing to defer
 	if err != nil {
@@ -58,18 +53,17 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 		},
 	}
 
-	untilTime := time.Now()
-	// default fromTime to 90 days
-	fromTime := untilTime.Add(-2160 * time.Hour) // 2160hr == 90 days => { "code" : "BadRequest", "message" : "The start time cannot be more than 90 days in the past."}
-
-	if !s.CollectionState.IsEmpty() {
-		latestEndTime := s.CollectionState.GetEndTime()
-		if !latestEndTime.IsZero() && latestEndTime.After(fromTime) {
-			fromTime = latestEndTime
-		}
+	// set the collection time range
+	// (note that although we collect backwards, 'from' is still the lower boundary time and 'to' is the upper boundary time,
+	// as we poass them top the filter in the correct order)
+	toTime := s.CollectionTimeRange.UpperBoundary
+	fromTime := s.CollectionTimeRange.LowerBoundary
+	// limit 'from' to 90 days in the past, as per Azure API limits
+	if time.Since(fromTime) > 2160*time.Hour {
+		return fmt.Errorf("from time %s is more than 90 days in the past, which exceeds Azure API limits", fromTime.Format(time.RFC3339Nano))
 	}
 
-	filter := fmt.Sprintf("eventTimestamp ge '%s' and eventTimestamp le '%s'", fromTime.Format(time.RFC3339Nano), untilTime.Format(time.RFC3339Nano))
+	filter := fmt.Sprintf("eventTimestamp ge '%s' and eventTimestamp le '%s'", fromTime.Format(time.RFC3339Nano), toTime.Format(time.RFC3339Nano))
 	pager := client.NewListPager(filter, nil)
 
 	for pager.More() {
@@ -80,9 +74,9 @@ func (s *ActivityLogAPISource) Collect(ctx context.Context) error {
 
 		for _, logEntry := range page.Value {
 
-			// check if we've hit previous item - return false if we have, return from function
+			// check if we've hit previous item - continue if we have
 			if !s.CollectionState.ShouldCollect(*logEntry.ID, *logEntry.EventTimestamp) {
-				return nil
+				continue
 			}
 
 			row := &types.RowData{
