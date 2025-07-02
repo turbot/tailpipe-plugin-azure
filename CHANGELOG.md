@@ -1,3 +1,9 @@
+## v0.6.0 [2025-07-02]
+
+_Dependencies_
+
+- Recompiled plugin with [tailpipe-plugin-sdk v0.9.1](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v091-2025-07-02) to support the `--to` flag, directional time-based collection, improved tracking of collected data and fix collection state issues.
+
 ## v0.5.0 [2025-06-20]
 
 _What's new?_
