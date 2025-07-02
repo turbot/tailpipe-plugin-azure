@@ -15,7 +15,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.3.0
 	github.com/turbot/pipe-fittings/v2 v2.5.2
-	github.com/turbot/tailpipe-plugin-sdk v0.9.0-rc.8
+	github.com/turbot/tailpipe-plugin-sdk v0.9.0
 )
 
 require (
