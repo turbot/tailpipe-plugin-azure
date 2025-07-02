@@ -2,7 +2,7 @@
 
 _Dependencies_
 
-- Recompiled plugin with [tailpipe-plugin-sdk v0.9.1](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v091-2025-07-02) to support the `--to` flag, directional time-based collection, improved tracking of collected data and fix collection state issues.
+- Recompiled plugin with [tailpipe-plugin-sdk v0.9.1](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v091-2025-07-02) to support the `--to` flag, directional time-based collection, improved tracking of collected data and fixed collection state issues. ([#81](https://github.com/turbot/tailpipe-plugin-azure/pull/81))
 
 ## v0.5.0 [2025-06-20]
 
