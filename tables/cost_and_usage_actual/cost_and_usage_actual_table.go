@@ -57,9 +57,6 @@ func (t *CostAndUsageActualTable) EnrichRow(row *CostAndUsageActual, sourceEnric
 	// Set TpTimestamp and TpDate based on available date fields using priority-based function
 	setTimestampByPriority(row)
 
-	// Set TpIndex to default index
-	row.TpIndex = schema.DefaultIndex
-
 	// Set TpAkas to resource ID if available
 	if row.ResourceId != nil {
 		row.TpAkas = append(row.TpAkas, *row.ResourceId)
