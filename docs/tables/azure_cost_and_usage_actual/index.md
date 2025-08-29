@@ -22,6 +22,7 @@ connection "azure" "cost_account" {
   client_id       = "00000000-0000-0000-0000-000000000000"
   client_secret   = "my plaintext secret"
 }
+
 partition "azure_cost_and_usage_actual" "my_costs" {
   source "azure_blob_storage" {
     connection   = connection.azure.cost_account
@@ -117,6 +118,7 @@ connection "azure" "cost_account" {
   client_id       = "00000000-0000-0000-0000-000000000000"
   client_secret   = "my plaintext secret"
 }
+
 partition "azure_cost_and_usage_actual" "my_costs" {
   source "azure_blob_storage" {
     connection   = connection.azure.cost_account
