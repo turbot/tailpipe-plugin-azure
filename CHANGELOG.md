@@ -1,3 +1,9 @@
+## v0.6.2 [2025-08-29]
+
+_Bug fixes_
+
+- Added the missing description for `azure_cost_and_usage_actual` table.
+
 ## v0.6.1 [2025-07-28]
 
 _Dependencies_
