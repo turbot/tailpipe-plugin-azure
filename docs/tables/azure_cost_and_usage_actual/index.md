@@ -9,7 +9,7 @@ The `azure_cost_and_usage_actual` table allows you to query data from Azure Cost
 
 ## Configure
 
-Create a [partition](https://tailpipe.io/docs/manage/partition) for `azure_cost_and_usage_actual` ([examples](#example-configurations)):
+Create a [partition](https://tailpipe.io/docs/manage/partition) for `azure_cost_and_usage_actual` ([examples](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_cost_and_usage_actual#example-configurations)):
 
 ```sh
 vi ~/.tailpipe/config/azure.tpc
