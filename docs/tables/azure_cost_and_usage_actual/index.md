@@ -7,6 +7,12 @@ description: "Azure Cost and Usage Actual data provides detailed information abo
 
 The `azure_cost_and_usage_actual` table allows you to query data from Azure Cost and Usage Actual exports. This table provides detailed information about Azure resource usage and costs, including subscription charges, resource consumption, pricing details, and billing information, enabling cost analysis, budget tracking, and optimization insights across Azure subscriptions.
 
+Limitations and notes:
+
+- The table currently supports exported logs in CSV format (compressed or uncompressed).
+- Files must follow the Azure Cost Management export naming pattern: `part_X_YYYY.csv.gz` or `part_X_YYYY.csv.zip`.
+- Cost data must be exported from Azure Cost Management and downloaded locally before processing.
+
 ## Configure
 
 Create a [partition](https://tailpipe.io/docs/manage/partition) for `azure_cost_and_usage_actual` ([examples](https://hub.tailpipe.io/plugins/turbot/azure/tables/azure_cost_and_usage_actual#example-configurations)):
@@ -16,18 +22,10 @@ vi ~/.tailpipe/config/azure.tpc
 ```
 
 ```hcl
-connection "azure" "cost_account" {
-  tenant_id       = "00000000-0000-0000-0000-000000000000"
-  subscription_id = "00000000-0000-0000-0000-000000000000"
-  client_id       = "00000000-0000-0000-0000-000000000000"
-  client_secret   = "my plaintext secret"
-}
-
 partition "azure_cost_and_usage_actual" "my_costs" {
-  source "azure_blob_storage" {
-    connection   = connection.azure.cost_account
-    account_name = "storage_account_name"
-    container    = "container_name"
+  source "file" {
+    paths = ["/path/to/cost/data/"]
+    file_layout = "part_%{INT:part_number}_%{INT:file_number}.csv.(?:gz|zip)"
   }
 }
 ```
@@ -107,63 +105,15 @@ order by
 
 ## Example Configurations
 
-### Collect cost data from a storage account
+### Collect cost data from local files
 
-Collect Azure Cost and Usage Actual data stored in a storage account.
+Collect Azure Cost Management export files stored locally.
 
 ```hcl
-connection "azure" "cost_account" {
-  tenant_id       = "00000000-0000-0000-0000-000000000000"
-  subscription_id = "00000000-0000-0000-0000-000000000000"
-  client_id       = "00000000-0000-0000-0000-000000000000"
-  client_secret   = "my plaintext secret"
-}
-
 partition "azure_cost_and_usage_actual" "my_costs" {
-  source "azure_blob_storage" {
-    connection   = connection.azure.cost_account
-    account_name = "storage_account_name"
-    container    = "container_name"
+  source "file" {
+    paths = ["/path/to/cost/data/"]
+    file_layout = "part_%{INT:part_number}_%{INT:file_number}.csv.(?:gz|zip)"
   }
 }
 ```
-
-### Filter costs by subscription
-
-Use the filter argument to focus on costs from a specific subscription.
-
-```hcl
-partition "azure_cost_and_usage_actual" "subscription_costs" {
-  filter = "subscription_id = '00000000-0000-0000-0000-000000000000'"
-  source "azure_blob_storage" {
-    connection   = connection.azure.cost_account
-    account_name = "storage_account_name"
-    container    = "container_name"
-  }
-}
-```
-
-### Filter costs by date range
-
-Filter costs to a specific date range to analyze spending during a particular period.
-
-```hcl
-partition "azure_cost_and_usage_actual" "recent_costs" {
-  filter = "date >= '2023-01-01' and date <= '2023-12-31'"
-  source "azure_blob_storage" {
-    connection   = connection.azure.cost_account
-    account_name = "storage_account_name"
-    container    = "container_name"
-  }
-}
-```
-
-## Source Defaults
-
-### azure_blob_storage
-
-This table sets the following defaults for the [azure_blob_storage source](https://hub.tailpipe.io/plugins/turbot/azure/sources/azure_blob_storage#arguments):
-
-| Argument    | Default |
-|-------------|---------|
-| file_layout | `part_%{INT:part_number}_%{INT:file_number}.csv.(?:gz|zip)` | 
