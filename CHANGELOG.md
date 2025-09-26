@@ -1,3 +1,9 @@
+## v0.6.3 [2025-09-26]
+
+_Dependencies_
+
+- Recompiled plugin with [tailpipe-plugin-sdk v0.9.4](https://github.com/turbot/tailpipe-plugin-sdk/blob/develop/CHANGELOG.md#v094-2025-09-26) that fixes an issue where `azure_blob_storage` was not working correctly as an artifact source. ([#94](https://github.com/turbot/tailpipe-plugin-azure/pull/94))
+
 ## v0.6.2 [2025-08-29]
 
 _Bug fixes_
