@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.23.0
 	github.com/rs/xid v1.6.0
 	github.com/turbot/go-kit v1.3.0
-	github.com/turbot/pipe-fittings/v2 v2.6.0
+	github.com/turbot/pipe-fittings/v2 v2.7.0
 	github.com/turbot/tailpipe-plugin-sdk v0.9.4
 )
 
@@ -104,7 +104,7 @@ require (
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-getter v1.7.5 // indirect
+	github.com/hashicorp/go-getter v1.7.9 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.6.1 // indirect
@@ -182,7 +182,7 @@ require (
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
 	github.com/turbot/pipes-sdk-go v0.12.0 // indirect
 	github.com/turbot/terraform-components v0.0.0-20231213122222-1f3526cab7a7 // indirect
-	github.com/ulikunitz/xz v0.5.10 // indirect
+	github.com/ulikunitz/xz v0.5.14 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
